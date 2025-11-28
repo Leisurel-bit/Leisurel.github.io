@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>实习经历 - 刘子硕</title>
+  <style>
+    /* 基础样式：继承主页面银河风格 */
+    :root{
+      --bg:#050510; 
+      --fg:#e8e8e8; 
+      --muted:#9b9b9b; 
+      --glass:rgba(255,255,255,0.06);
+      --accent:#ffffff;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      --border-color: rgba(255,255,255,0.08);
+      /* 银河色调 */
+      --nebula-purple: rgba(100, 50, 200, 0.1);
+      --nebula-blue: rgba(50, 100, 200, 0.08);
+      --nebula-pink: rgba(200, 50, 150, 0.05);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;}
+    .stage{position:relative;width:100%;min-height:100vh;overflow:hidden;}
+    canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;}
+
+    /* 顶部导航 */
+    .navbar{
+      position:sticky;top:0;z-index:20;padding:16px 24px;
+      background:var(--card-bg);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border-color);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .nav-title{font-size:18px;font-weight:600;color:var(--accent);}
+    .back-btn{
+      padding:8px 16px;border-radius:8px;
+      background:var(--glass);border:1px solid var(--border-color);
+      color:var(--fg);cursor:pointer;transition:all 0.2s;
+    }
+    .back-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+
+    /* 页面内容容器 */
+    .page-container{
+      position:relative;z-index:10;max-width:1000px;margin:0 auto;padding:40px 24px;
+    }
+
+    /* 标题区域 */
+    .page-header{margin-bottom:48px;text-align:center;}
+    .page-title{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;}
+    .page-subtitle{font-size:16px;color:var(--muted);max-width:600px;margin:0 auto;}
+
+    /* 实习经历卡片 */
+    .internship-timeline{display:flex;flex-direction:column;gap:36px;}
+    .internship-card{
+      padding:28px;border-radius:16px;
+      background:var(--card-bg);backdrop-filter:blur(6px);
+      border:1px solid var(--border-color);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+      transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .internship-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 40px rgba(0,0,0,0.6);
+      border-color:rgba(255,255,255,0.15);
+    }
+
+    /* 卡片内部样式 */
+    .card-header{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:16px;padding-bottom:12px;
+      border-bottom:1px solid var(--border-color);
+    }
+    .company-name{font-size:20px;font-weight:600;color:var(--accent);}
+    .internship-period{font-size:14px;color:var(--muted);}
+    .job-position{font-size:16px;font-weight:500;margin:16px 0;color:var(--accent);}
+    .responsibility-list{list-style:none;margin:16px 0;padding-left:20px;}
+    .responsibility-item{margin:8px 0;position:relative;}
+    .responsibility-item::before{
+      content:'';position:absolute;left:-20px;top:6px;
+      width:8px;height:8px;border-radius:50%;background:var(--accent);opacity:0.7;
+    }
+    .skill-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+    .skill-tag{
+      padding:5px 12px;border-radius:6px;font-size:12px;
+      background:var(--glass);border:1px solid var(--border-color);
+    }
+
+    /* 响应式适配 */
+    @media (max-width:760px){
+      .page-title{font-size:26px;}
+      .card-header{flex-direction:column;align-items:flex-start;gap:8px;}
+      .internship-card{padding:20px;}
+      .page-container{padding:30px 16px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <!-- 银河背景Canvas（静态效果） -->
+    <canvas id="galaxy" aria-hidden="true"></canvas>
+
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+      <div class="nav-title">实习经历</div>
+      <button class="back-btn" onclick="window.location.href='index.html'">返回主页</button>
+    </nav>
+
+    <!-- 页面主要内容 -->
+    <div class="page-container">
+      <div class="page-header">
+        <h1 class="page-title">我的实习经历</h1>
+        <p class="page-subtitle">求职意向：互联网、工业界的产品、项目相关岗位</p>
+      </div>
+
+      <!-- 实习经历列表 -->
+      <div class="internship-timeline">
+        <!-- 实习1：Momenta -->
+        <div class="internship-card">
+          <div class="card-header">
+            <div class="company-name">Momenta（自动驾驶）</div>
+            <div class="internship-period">2025.07 - 2025.12（5个月）</div>
+          </div>
+          <div class="job-position">项目经理实习生</div>
+          <p>L2++自动驾驶乘用车交付业务-美国通用汽车项目</p>
+          <ul class="responsibility-list">
+            <li class="responsibility-item">主导发版流程：制定发版计划、主导需求评审/CCB评审/功能准出测试评审会、推动软件打包、产品准出版本审批及后续Hotfix版本补充，确保各方按期交付；协助推进R6主线需求回流，建立回流审批流程，协助产品自动化。</li>
+            <li class="responsibility-item">风险控制：持续跟踪项目故障码准出率，从刚入职时77%提升至最终90%，组织故障码高优问题周会并推动问题闭环；搭建共享文档同步短期风险，负责40+模块测试报告交付跟踪并最终按时交付。</li>
+            <li class="responsibility-item">人员协调：负责测试司机调度与公司人员权限管理；协同PPM、路测、集成、模块研发等多团队组织对齐会议。</li>
+            <li class="responsibility-item">资源管理：统筹内部/客户测试车辆预约与审批，平衡多Feature并行测试的排期冲突；维护车辆信息看板，推动车辆软硬件升级，支持Lidar重新标定，确保车辆配置准确；每周向客户输出车辆使用报告，分析异常用车时长。</li>
+            <li class="responsibility-item">成本管理：按月制定车队运营预算，并定期根据项目情况追加预算；管控月度成本（工资、差旅、硬件采购、维修、充电、场地费用等），保障费用审批链及时闭环；申报车辆维修托运、司机差旅审批单等。</li>
+          </ul>
+          <div class="skill-tags">
+            <span class="skill-tag">软件发版</span>
+            <span class="skill-tag">风险管理</span>
+            <span class="skill-tag">项目排期</span>
+            <span class="skill-tag">成本管理</span>
+          </div>
+        </div>
+
+        <!-- 实习2：美团 -->
+        <div class="internship-card">
+          <div class="card-header">
+            <div class="company-name">美团（互联网）</div>
+            <div class="internship-period">2024.08 - 2024.11（4个月）</div>
+          </div>
+          <div class="job-position">策略运营实习生</div>
+          <p>点评事业部-作者激励策略团队</p>
+          <ul class="responsibility-list">
+            <li class="responsibility-item">创作者赏金计划-产品化现金激励活动迭代：以整体日均阅读为目标，向优质笔记PUGC&PGC作者发放现金激励，同时实现阅读增量和用户心智教育。在职期间，大盘日均阅读6400w>>7400w（+15.6%），其中活动贡献阅读883w>>1600w（+81.2%）；CPM11.6>>3.7，共撬动42w投稿作者，464w篇笔记，1.1亿次曝光。</li>
+            <li class="responsibility-item">策略设计：a.降低活动参与门槛：从初版圈选人群包到后期全量下发且新用户随时下发，与产品对接改进内部产品工具；从进入页面且需带特定话题到增加报名环节再到不强制带话题用户进入页面即可参与，合作完成产品PRD迭代。b.拉新内容涨粉作者：服务百粉作者规模，现金激励公式中加入内容涨粉系数，按照粉丝数、内容涨粉速度、发文频率等指标划分系数档位。c.生态管控策略：为降低搬运内容占比同时不降低大盘阅读数据，单独设计低质垂类标签，可控奖金池且可灵活开放过滤内容；同时“削峰填谷”：砍掉数据靠前的笔记奖金，提高小额奖金数量。</li>
+            <li class="responsibility-item">数据分析：熟练使用SQL拉取每周活动发奖数据和消费数据，使用EXCEL常见函数处理数据并撰写周报，为各垂类运营和上级整理复盘。通过预算消耗和CPM来评判各垂类和具体内容小组的宣传口径、阅读牵引力度，并给出调整建议；通过调整单篇笔记发奖上限、每日发奖数额等来控制成本，并决定短期内使用注重头部or普惠策略。</li>
+            <li class="responsibility-item">部门协作：a.针对客诉问题编写活动垂类自查SOP：按照发奖流程时间线列举每个节点的机制、场景问题和解决方案，给出每个环节的自查SQL，客诉频率由每天平均三条到每周一条。b.对接垂类及数仓进行周报内容与活动看板修改，减少了沟通、阅读、取数时间成本。</li>
+            <li class="responsibility-item">活动执行：活动前：人群包准备、资源位申请、任务下发、新垂类接入活动试标；活动中：客诉处理、每周话题配置变动；活动调整：定期修改各垂类小组的进审额度配置和发奖策略；活动迭代：与产品合作完成降低活动门槛产品迭代PRD，修改页面规则及垂类宣发文案。</li>
+          </ul>
+          <div class="skill-tags">
+            <span class="skill-tag">产品迭代</span>
+            <span class="skill-tag">策略设计</span>
+            <span class="skill-tag">数据分析</span>
+            <span class="skill-tag">部门协作</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 银河背景JS（静态版本） -->
+  <script>
+    (function(){
+      const canvas = document.getElementById('galaxy');
+      const ctx = canvas.getContext('2d');
+      let W = window.innerWidth, H = window.innerHeight, dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      // 1. 第一步：先定义星云和星星数据（核心修复点）
+      const nebulas = [
+        {x: W*0.2, y: H*0.3, size: W*0.6, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-purple')},
+        {x: W*0.7, y: H*0.6, size: W*0.5, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-blue')},
+        {x: W*0.5, y: H*0.2, size: W*0.4, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-pink')}
+      ];
+
+      const stars = [
+        ...Array.from({length:80}).map(()=>({
+          type:'tiny',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:Math.random()*0.8,
+          a:0.2+Math.random()*0.6,
+          color: 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:50}).map(()=>({
+          type:'medium',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:0.8+Math.random()*1.2,
+          a:0.4+Math.random()*0.7,
+          color: Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:20}).map(()=>({
+          type:'bright',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:1.5+Math.random()*2,
+          a:0.7+Math.random()*0.3,
+          color: Math.random() > 0.7 ? 'rgba(255,240,220,1)' : 
+                 Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        }))
+      ];
+
+      // 2. 第二步：定义绘制函数（依赖上面的数据）
+      function drawNebulas(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        nebulas.forEach(neb=>{
+          const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.size);
+          grad.addColorStop(0, neb.color);
+          grad.addColorStop(0.5, neb.color.replace(/0\.\d+/, '0.05'));
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.arc(neb.x, neb.y, neb.size, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawStars(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        stars.forEach(s=>{
+          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*2);
+          grad.addColorStop(0, `${s.color.replace('1)', `${s.a})`)}`);
+          grad.addColorStop(0.5, `${s.color.replace('1)', `${s.a*0.6})`)}`);
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          
+          ctx.fillStyle = grad;
+          ctx.arc(s.x, s.y, s.r*2, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawGalaxy(){
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0,0,W,H);
+        drawNebulas();
+        drawStars();
+      }
+
+      // 3. 第三步：定义 resize 和初始化逻辑（最后执行）
+      function resize(){
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        drawGalaxy();
+      }
+
+      // 初始化执行
+      resize();
+      window.addEventListener('resize', resize);
+    })();
+  </script>
+</body>
+</html>
+    

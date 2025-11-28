@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>兴趣爱好 - 刘子硕</title>
+  <style>
+    /* 基础样式：继承主页面银河风格 */
+    :root{
+      --bg:#050510; 
+      --fg:#e8e8e8; 
+      --muted:#9b9b9b; 
+      --glass:rgba(255,255,255,0.06);
+      --accent:#ffffff;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      --border-color: rgba(255,255,255,0.08);
+      /* 银河色调 */
+      --nebula-purple: rgba(100, 50, 200, 0.1);
+      --nebula-blue: rgba(50, 100, 200, 0.08);
+      --nebula-pink: rgba(200, 50, 150, 0.05);
+      /* 新增变量 */
+      --hover-scale: 1.03;
+      --transition-speed: 0.3s;
+      --image-border-radius: 12px;
+      --section-gap: 80px;
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --card-shadow-hover: 0 15px 40px rgba(0,0,0,0.6);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;}
+    .stage{position:relative;width:100%;min-height:100vh;overflow:hidden;}
+    canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;}
+
+    /* 顶部导航 */
+    .navbar{
+      position:sticky;top:0;z-index:20;padding:16px 24px;
+      background:var(--card-bg);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border-color);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .nav-title{font-size:18px;font-weight:600;color:var(--accent);}
+    .back-btn{
+      padding:8px 16px;border-radius:8px;
+      background:var(--glass);border:1px solid var(--border-color);
+      color:var(--fg);cursor:pointer;transition:all 0.2s;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .back-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+
+    /* 页面内容容器 */
+    .page-container{
+      position:relative;z-index:10;max-width:1200px;margin:0 auto;padding:40px 24px;
+    }
+
+    /* 标题区域 */
+    .page-header{margin-bottom:60px;text-align:center;}
+    .page-title{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;}
+    .page-subtitle{font-size:16px;color:var(--muted);max-width:600px;margin:0 auto;}
+
+    /* 兴趣分类标题 */
+    .hobby-category-title{
+      font-size:28px;font-weight:700;color:var(--accent);
+      margin-bottom:30px;
+      padding-bottom:12px;
+      border-bottom:1px solid var(--border-color);
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .hobby-category-title i{
+      opacity:0.8;
+      font-size:24px;
+    }
+
+    /* 兴趣分类容器 */
+    .hobby-category{
+      margin-bottom:var(--section-gap);
+      scroll-margin-top:100px;
+    }
+
+    /* 摄影部分 */
+    .photography-preview{
+      background:var(--card-bg);
+      border:1px solid var(--border-color);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:var(--card-shadow);
+      transition:var(--transition-speed);
+    }
+    .photography-preview:hover{
+      transform:var(--hover-scale);
+      box-shadow:var(--card-shadow-hover);
+      border-color:rgba(255,255,255,0.15);
+    }
+    .photography-header{
+      padding:24px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid var(--border-color);
+    }
+    .photography-title{
+      font-size:22px;font-weight:600;color:var(--accent);
+    }
+    .view-more{
+      padding:8px 16px;
+      background:var(--glass);
+      border:1px solid var(--border-color);
+      border-radius:8px;
+      color:var(--fg);
+      text-decoration:none;
+      font-size:14px;
+      transition:all 0.2s;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .view-more:hover{
+      background:rgba(255,255,255,0.1);
+      border-color:rgba(255,255,255,0.2);
+    }
+    .preview-gallery{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1px;
+      background:var(--border-color);
+    }
+    .preview-image{
+      aspect-ratio:1;
+      overflow:hidden;
+      position:relative;
+    }
+    .preview-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform 0.5s ease;
+    }
+    .preview-image:hover img{
+      transform:scale(1.08);
+    }
+    .preview-overlay{
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,0.4);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:0;
+      transition:opacity 0.3s;
+      color:var(--accent);
+      font-weight:600;
+    }
+    .preview-image:hover .preview-overlay{
+      opacity:1;
+    }
+
+    /* 写作部分 */
+    .writing-container{
+      display:grid;
+      grid-template-columns:300px 1fr;
+      gap:30px;
+    }
+    @media (max-width:760px){
+      .writing-container{
+        grid-template-columns:1fr;
+      }
+    }
+    .public-account{
+      background:var(--card-bg);
+      border:1px solid var(--border-color);
+      border-radius:16px;
+      padding:24px;
+      box-shadow:var(--card-shadow);
+      text-align:center;
+      height:fit-content;
+    }
+    .account-qrcode{
+      width:180px;
+      height:180px;
+      background:var(--fg);
+      margin:0 auto 16px;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--bg);
+      font-weight:bold;
+    }
+    .account-name{
+      font-size:18px;font-weight:600;color:var(--accent);
+      margin-bottom:8px;
+    }
+    .account-desc{
+      font-size:14px;color:var(--muted);
+      margin-bottom:20px;
+    }
+    .articles-list{
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+    .article-card{
+      background:var(--card-bg);
+      border:1px solid var(--border-color);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:var(--card-shadow);
+      transition:var(--transition-speed);
+      display:grid;
+      grid-template-columns:200px 1fr;
+      gap:20px;
+    }
+    .article-card:hover{
+      transform:translateY(-5px);
+      box-shadow:var(--card-shadow-hover);
+      border-color:rgba(255,255,255,0.15);
+    }
+    @media (max-width:760px){
+      .article-card{
+        grid-template-columns:1fr;
+      }
+    }
+    .article-image{
+      height:140px;
+      overflow:hidden;
+    }
+    @media (max-width:760px){
+      .article-image{
+        height:200px;
+      }
+    }
+    .article-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform 0.5s ease;
+    }
+    .article-card:hover .article-image img{
+      transform:scale(1.08);
+    }
+    .article-content{
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+    }
+    .article-title{
+      font-size:18px;font-weight:600;color:var(--accent);
+      margin-bottom:8px;
+      transition:color 0.3s;
+    }
+    .article-card:hover .article-title{
+      color:#ffffff;
+    }
+    .article-excerpt{
+      font-size:14px;color:var(--muted);
+      line-height:1.6;
+      flex:1;
+      margin-bottom:12px;
+    }
+    .article-meta{
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;color:var(--muted);
+    }
+
+    /* 运动部分 */
+    .sports-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+      gap:24px;
+    }
+    .sport-card{
+      background:var(--card-bg);
+      border:1px solid var(--border-color);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:var(--card-shadow);
+      transition:var(--transition-speed);
+    }
+    .sport-card:hover{
+      transform:var(--hover-scale);
+      box-shadow:var(--card-shadow-hover);
+      border-color:rgba(255,255,255,0.15);
+    }
+    .sport-image{
+      height:160px;
+      overflow:hidden;
+    }
+    .sport-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform 0.5s ease;
+    }
+    .sport-card:hover .sport-image img{
+      transform:scale(1.08);
+    }
+    .sport-info{
+      padding:20px;
+      text-align:center;
+    }
+    .sport-name{
+      font-size:18px;font-weight:600;color:var(--accent);
+      margin-bottom:8px;
+    }
+    .sport-desc{
+      font-size:14px;color:var(--muted);
+    }
+
+    /* 响应式适配 */
+    @media (max-width:760px){
+      .page-title{font-size:26px;}
+      .page-container{padding:30px 16px;}
+      .hobby-category-title{font-size:24px;}
+      .preview-gallery{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="stage">
+    <!-- 银河背景Canvas -->
+    <canvas id="galaxy" aria-hidden="true"></canvas>
+
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+      <div class="nav-title">兴趣爱好</div>
+      <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回主页
+      </a>
+    </nav>
+
+    <!-- 页面主要内容 -->
+    <div class="page-container">
+      <div class="page-header">
+        <h1 class="page-title">我的兴趣爱好</h1>
+        <p class="page-subtitle">工作之外的多彩生活，探索世界的不同维度</p>
+      </div>
+
+      <!-- 摄影部分 -->
+      <section class="hobby-category" id="photography">
+        <h2 class="hobby-category-title">
+          <i class="fas fa-camera"></i> 摄影
+        </h2>
+        <div class="photography-preview">
+          <div class="photography-header">
+            <div class="photography-title">捕捉生活中的美好瞬间</div>
+            <a href="photography.html" class="view-more">
+              查看全部 <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="preview-gallery">
+            <div class="preview-image">
+              <img src="https://picsum.photos/id/10/600/600" alt="风光摄影作品">
+              <div class="preview-overlay">风光</div>
+            </div>
+            <div class="preview-image">
+              <img src="https://picsum.photos/id/20/600/600" alt="人像摄影作品">
+              <div class="preview-overlay">人像</div>
+            </div>
+            <div class="preview-image">
+              <img src="https://picsum.photos/id/30/600/600" alt="街头摄影作品">
+              <div class="preview-overlay">街头</div>
+            </div>
+            <div class="preview-image">
+              <img src="https://picsum.photos/id/40/600/600" alt="夜景摄影作品">
+              <div class="preview-overlay">夜景</div>
+            </div>
+            <div class="preview-image">
+              <img src="https://picsum.photos/id/50/600/600" alt="微距摄影作品">
+              <div class="preview-overlay">微距</div>
+            </div>
+            <div class="preview-image">
+              <img src="https://picsum.photos/id/60/600/600" alt="旅行摄影作品">
+              <div class="preview-overlay">旅行</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 写作部分 -->
+      <section class="hobby-category" id="writing">
+        <h2 class="hobby-category-title">
+          <i class="fas fa-pen-fancy"></i> 写作
+        </h2>
+        <div class="writing-container">
+          <div class="public-account">
+            <div class="account-qrcode">公众号二维码</div>
+            <div class="account-name">子硕的思考空间</div>
+            <div class="account-desc">分享生活感悟与旅行见闻</div>
+            <a href="#" class="view-more" target="_blank">
+              <i class="fas fa-link"></i> 访问公众号
+            </a>
+          </div>
+          <div class="articles-list">
+            <!-- 文章1 -->
+            <div class="article-card">
+              <div class="article-image">
+                <img src="https://picsum.photos/id/101/600/400" alt="文章配图">
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
+                <div class="article-meta">
+                  <span><i class="far fa-calendar"></i> 2023-08-15</span>
+                  <span><i class="far fa-eye"></i> 1.2k阅读</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 文章2 -->
+            <div class="article-card">
+              <div class="article-image">
+                <img src="https://picsum.photos/id/102/600/400" alt="文章配图">
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">摄影器材选购指南：从入门到专业</h3>
+                <p class="article-excerpt">详细解析不同价位的相机和镜头选择，适合摄影新手的装备配置建议，以及如何避免不必要的开支。</p>
+                <div class="article-meta">
+                  <span><i class="far fa-calendar"></i> 2023-06-22</span>
+                  <span><i class="far fa-eye"></i> 2.5k阅读</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 文章3 -->
+            <div class="article-card">
+              <div class="article-image">
+                <img src="https://picsum.photos/id/103/600/400" alt="文章配图">
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">足球与人生：团队协作的哲学</h3>
+                <p class="article-excerpt">通过多年的足球运动经历，探讨团队协作的重要性，以及如何在竞争中保持友谊，在合作中实现共赢。</p>
+                <div class="article-meta">
+                  <span><i class="far fa-calendar"></i> 2023-05-10</span>
+                  <span><i class="far fa-eye"></i> 986阅读</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 文章4 -->
+            <div class="article-card">
+              <div class="article-image">
+                <img src="https://picsum.photos/id/104/600/400" alt="文章配图">
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">深夜骑行：城市另一面的探索</h3>
+                <p class="article-excerpt">记录深夜骑行穿越城市的独特体验，观察到的城市另一面，以及夜间骑行的安全注意事项。</p>
+                <div class="article-meta">
+                  <span><i class="far fa-calendar"></i> 2023-03-18</span>
+                  <span><i class="far fa-eye"></i> 1.8k阅读</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 文章5 -->
+            <div class="article-card">
+              <div class="article-image">
+                <img src="https://picsum.photos/id/105/600/400" alt="文章配图">
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">海浪中的思考：冲浪教会我的事</h3>
+                <p class="article-excerpt">从冲浪运动中领悟到的生活哲学，如何面对不确定性，如何在失控中找到平衡，以及对自然的敬畏之心。</p>
+                <div class="article-meta">
+                  <span><i class="far fa-calendar"></i> 2023-01-05</span>
+                  <span><i class="far fa-eye"></i> 3.2k阅读</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 运动部分 -->
+      <section class="hobby-category" id="sports">
+        <h2 class="hobby-category-title">
+          <i class="fas fa-running"></i> 运动
+        </h2>
+        <div class="sports-grid">
+          <!-- 足球 -->
+          <div class="sport-card">
+            <div class="sport-image">
+              <img src="https://picsum.photos/id/201/600/400" alt="足球运动">
+            </div>
+            <div class="sport-info">
+              <h3 class="sport-name">足球</h3>
+              <p class="sport-desc">每周固定参与业余联赛，司职中场，擅长组织进攻</p>
+            </div>
+          </div>
+          
+          <!-- 骑行 -->
+          <div class="sport-card">
+            <div class="sport-image">
+              <img src="https://picsum.photos/id/202/600/400" alt="骑行运动">
+            </div>
+            <div class="sport-info">
+              <h3 class="sport-name">骑行</h3>
+              <p class="sport-desc">累计骑行距离超10000公里，完成多次单日200公里挑战</p>
+            </div>
+          </div>
+          
+          <!-- 羽毛球 -->
+          <div class="sport-card">
+            <div class="sport-image">
+              <img src="https://picsum.photos/id/203/600/400" alt="羽毛球运动">
+            </div>
+            <div class="sport-info">
+              <h3 class="sport-name">羽毛球</h3>
+              <p class="sport-desc">校队成员，擅长双打，正手扣杀是招牌动作</p>
+            </div>
+          </div>
+          
+          <!-- 网球 -->
+          <div class="sport-card">
+            <div class="sport-image">
+              <img src="https://picsum.photos/id/204/600/400" alt="网球运动">
+            </div>
+            <div class="sport-info">
+              <h3 class="sport-name">网球</h3>
+              <p class="sport-desc">每周两次练习，偏好红土场地，反手技术见长</p>
+            </div>
+          </div>
+          
+          <!-- 乒乓球 -->
+          <div class="sport-card">
+            <div class="sport-image">
+              <img src="https://picsum.photos/id/205/600/400" alt="乒乓球运动">
+            </div>
+            <div class="sport-info">
+              <h3 class="sport-name">乒乓球</h3>
+              <p class="sport-desc">横拍打法，擅长弧圈球，曾获市级业余组前八</p>
+            </div>
+          </div>
+          
+          <!-- 冲浪 -->
+          <div class="sport-card">
+            <div class="sport-image">
+              <img src="https://picsum.photos/id/206/600/400" alt="冲浪运动">
+            </div>
+            <div class="sport-info">
+              <h3 class="sport-name">冲浪</h3>
+              <p class="sport-desc">每年假期前往冲浪胜地练习，可完成多种进阶动作</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 银河背景JS -->
+  <script>
+    (function(){
+      const canvas = document.getElementById('galaxy');
+      const ctx = canvas.getContext('2d');
+      let W = window.innerWidth, H = window.innerHeight, dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      // 定义星云和星星数据
+      const nebulas = [
+        {x: W*0.2, y: H*0.3, size: W*0.6, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-purple')},
+        {x: W*0.7, y: H*0.6, size: W*0.5, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-blue')},
+        {x: W*0.5, y: H*0.2, size: W*0.4, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-pink')}
+      ];
+
+      const stars = [
+        ...Array.from({length:80}).map(()=>({
+          type:'tiny',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:Math.random()*0.8,
+          a:0.2+Math.random()*0.6,
+          color: 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:50}).map(()=>({
+          type:'medium',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:0.8+Math.random()*1.2,
+          a:0.4+Math.random()*0.7,
+          color: Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:20}).map(()=>({
+          type:'bright',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:1.5+Math.random()*2,
+          a:0.7+Math.random()*0.3,
+          color: Math.random() > 0.7 ? 'rgba(255,240,220,1)' : 
+                 Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        }))
+      ];
+
+      // 绘制函数
+      function drawNebulas(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        nebulas.forEach(neb=>{
+          const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.size);
+          grad.addColorStop(0, neb.color);
+          grad.addColorStop(0.5, neb.color.replace(/0\.\d+/, '0.05'));
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.arc(neb.x, neb.y, neb.size, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawStars(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        stars.forEach(s=>{
+          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*2);
+          grad.addColorStop(0, `${s.color.replace('1)', `${s.a})`)}`);
+          grad.addColorStop(0.5, `${s.color.replace('1)', `${s.a*0.6})`)}`);
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          
+          ctx.fillStyle = grad;
+          ctx.arc(s.x, s.y, s.r*2, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawGalaxy(){
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0,0,W,H);
+        drawNebulas();
+        drawStars();
+      }
+
+      // Resize和初始化逻辑
+      function resize(){
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        drawGalaxy();
+      }
+
+      // 初始化执行
+      resize();
+      window.addEventListener('resize', resize);
+    })();
+  </script>
+</body>
+</html>

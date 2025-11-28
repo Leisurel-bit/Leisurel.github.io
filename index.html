@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>个人银河 - 刘子硕</title>
+  <style>
+    /* 基础样式：太空银河风格 */
+    :root{
+      --bg:#050510; 
+      --fg:#e8e8e8; 
+      --muted:#9b9b9b; 
+      --glass:rgba(255,255,255,0.06);
+      --accent:rgba(255,255,255,0.98);
+      --card-w:260px;
+      /* 银河色调 */
+      --nebula-purple: rgba(100, 50, 200, 0.1);
+      --nebula-blue: rgba(50, 100, 200, 0.08);
+      --nebula-pink: rgba(200, 50, 150, 0.05);
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    .stage{position:relative;width:100%;height:100vh;overflow:hidden}
+    canvas{display:block;width:100%;height:100%}
+
+    /* 中心信息卡 */
+    .core-card{
+      position:absolute;left:50%;top:35%;transform:translate(-50%,-50%);
+      width:var(--card-w);padding:24px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));backdrop-filter:blur(6px);
+      box-shadow:0 8px 40px rgba(0,0,0,0.6);text-align:center;border:1px solid rgba(255,255,255,0.06);
+      pointer-events:auto;
+      z-index:10;
+    }
+    .core-title{font-size:20px;font-weight:700;letter-spacing:0.6px}
+    .core-sub{font-size:13px;color:var(--muted);margin-top:6px}
+    .core-contact{font-size:12px;color:var(--muted);margin-top:10px}
+
+    /* 粒子透明文本框 */
+    .label{
+      position:absolute;transform:translate(-50%,-50%);min-width:200px;padding:14px 16px;border-radius:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.06);color:var(--fg);font-size:16px;text-align:center;pointer-events:auto;
+      transition:transform 160ms ease,opacity 160ms ease,box-shadow 160ms ease,border-color 160ms ease;
+      backdrop-filter:blur(4px);
+      outline: none;
+      cursor: pointer;
+    }
+    .label:hover, .label:focus{
+      transform:translate(-50%,-50%) scale(1.15);
+      box-shadow:0 8px 28px rgba(0,0,0,0.7);
+      border-color: rgba(255,255,255,0.3);
+    }
+    /* 焦点状态的白色边框效果 */
+    .label.focus-visible {
+      border-color: rgba(255,255,255,0.8);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+    }
+
+    /* 底部说明 */
+    .hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:12px;color:var(--muted);z-index:5}
+
+    /* 小屏适配 */
+    @media (max-width:760px){
+      :root{--card-w:86vw}
+      .label{font-size:14px;min-width:140px;padding:10px 12px}
+      .core-card{top:38%}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <canvas id="galaxy" aria-hidden="true"></canvas>
+
+    <div class="core-card" id="coreCard">
+      <div class="core-title">刘子硕</div>
+      <div class="core-sub">交通工程 & 自动驾驶 研究生<br/>研究方向：道路安全、轨迹预测</div>
+      <div class="core-contact">email: 1286874010@qq.com</div>
+    </div>
+
+    <!-- labels (will be positioned by JS) -->
+    <div id="labels"></div>
+
+    <div class="hint">移动鼠标/触摸以高亮 • 点击查看详情 • 上下键切换 • Enter 进入</div>
+  </div>
+
+  <script>
+  (function(){
+    // ========== CONFIG ==========
+    const PARTICLES = [
+      {id:0,title:'实习经历',detail:'Momenta: 自动驾驶量产交付；美团: 创作者运营策略', url: 'internship.html'},
+      {id:1,title:'教育背景',detail:'XX大学 交通运输工程 硕士在读', url: 'education.html'},
+      {id:2,title:'创业项目',detail:'曾参与校园创新项目：XXX', url: 'startup.html'},
+      {id:3,title:'个人爱好',detail:'足球、编程、星空摄影', url: 'hobbies.html'},
+      {id:4,title:'好玩的尝试',detail:'好玩的想法', url: 'funtry.html'},
+      {id:5,title:'项目展示',detail:'STA-LSTM 样本处理；点云表面分割', url: 'project.html'}
+    ];
+    // ============================
+
+    const canvas = document.getElementById('galaxy');
+    const ctx = canvas.getContext('2d');
+    const labelsRoot = document.getElementById('labels');
+
+    let W = 1200, H = 800, dpr = Math.max(1, window.devicePixelRatio || 1);
+    
+    // 屏幕角落坐标 - 这些会在resize时更新
+    let screenCorners = {
+      topRight: {x: 0, y: 0},   // 右上角
+      bottomLeft: {x: 0, y: 0}  // 左下角
+    };
+    
+    function resize(){
+      const rect = canvas.getBoundingClientRect();
+      W = Math.floor(rect.width);
+      H = Math.floor(rect.height);
+      canvas.width = W * dpr; 
+      canvas.height = H * dpr;
+      canvas.style.width = rect.width + 'px'; 
+      canvas.style.height = rect.height + 'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      
+      // 更新屏幕角落坐标
+      screenCorners.topRight = {x: W, y: 0};
+      screenCorners.bottomLeft = {x: 0, y: H};
+    }
+    
+    function ensureCanvasParent(){
+      const stage = document.querySelector('.stage');
+      stage.style.width = '100%'; 
+      stage.style.height = '100vh';
+      const r = stage.getBoundingClientRect();
+      canvas.style.width = r.width + 'px'; 
+      canvas.style.height = r.height + 'px';
+    }
+    
+    ensureCanvasParent();
+    resize();
+    window.addEventListener('resize', ()=>{
+      ensureCanvasParent();
+      resize();
+    });
+
+    // 银河星云效果
+    const nebulas = [
+      {x: W*0.2, y: H*0.3, size: W*0.6, speed: 0.02, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-purple')},
+      {x: W*0.7, y: H*0.6, size: W*0.5, speed: 0.03, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-blue')},
+      {x: W*0.5, y: H*0.2, size: W*0.4, speed: 0.015, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-pink')}
+    ];
+
+    // 创建不同类型的星星
+    const stars = [
+      ...Array.from({length:400}).map(()=>({
+        type: 'tiny',
+        x:Math.random()*W,
+        y:Math.random()*H,
+        r:Math.random()*0.8,
+        a:0.2+Math.random()*0.6,
+        phase:Math.random()*Math.PI*2,
+        vx: (Math.random() - 0.5) * 0.05,
+        vy: (Math.random() - 0.5) * 0.05
+      })),
+      ...Array.from({length:150}).map(()=>({
+        type: 'medium',
+        x:Math.random()*W,
+        y:Math.random()*H,
+        r:0.8+Math.random()*1.2,
+        a:0.4+Math.random()*0.7,
+        phase:Math.random()*Math.PI*2,
+        vx: (Math.random() - 0.5) * 0.03,
+        vy: (Math.random() - 0.5) * 0.03,
+        flicker: Math.random() > 0.7
+      })),
+      ...Array.from({length:50}).map(()=>({
+        type: 'bright',
+        x:Math.random()*W,
+        y:Math.random()*H,
+        r:1.5+Math.random()*2,
+        a:0.7+Math.random()*0.3,
+        phase:Math.random()*Math.PI*2,
+        vx: (Math.random() - 0.5) * 0.02,
+        vy: (Math.random() - 0.5) * 0.02,
+        color: Math.random() > 0.7 ? 'rgba(255, 240, 220, 1)' : 
+               Math.random() > 0.5 ? 'rgba(220, 240, 255, 1)' : 'rgba(255, 255, 255, 1)'
+      }))
+    ];
+
+    // 流星系统 - 基于屏幕坐标的实现
+    let meteors = [];
+    const MAX_METEORS = 2;        // 同时存在的最大流星数量
+    const METEOR_INTERVAL = 1500; // 生成新流星的最小间隔(ms)
+    let lastMeteorTime = 0;
+
+    // 生成新流星 - 从屏幕右上角出发，到左下角结束
+    function spawnMeteor(currentTime) {
+      // 检查是否可以生成新流星
+      if (meteors.length < MAX_METEORS && currentTime - lastMeteorTime > METEOR_INTERVAL) {
+        // 流星属性
+        const size = 1 + Math.random() * 2;
+        const speed = 1 + Math.random() * 1; // 速度适中，确保可见
+        const alpha = 0.8 + Math.random() * 0.2;
+        
+        // 随机颜色
+        const colors = [
+          'rgba(255, 255, 255, 1)',
+          'rgba(255, 240, 220, 1)',
+          'rgba(220, 240, 255, 1)'
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        // 精确计算起点：屏幕右上角及附近区域
+        // 从屏幕右上角内10%到外20%的区域生成
+        const startX = screenCorners.topRight.x * 0.9 + Math.random() * screenCorners.topRight.x * 0.2;
+        const startY = screenCorners.topRight.y + Math.random() * H * 0.1; // 顶部10%区域内
+        
+        // 计算终点：屏幕左下角及附近区域
+        const endX = -W * 0.1 + Math.random() * W * 0.1; // 左侧10%区域内
+        const endY = screenCorners.bottomLeft.y * 0.9 + Math.random() * screenCorners.bottomLeft.y * 0.1;
+        
+        // 计算从起点到终点的角度
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const angle = Math.atan2(dy, dx);
+        
+        // 计算轨迹长度并添加随机值（范围在总轨迹的15%到35%之间）
+        const minLengthRatio = 0.05;  // 最小长度比例
+        const maxLengthRatio = 0.15;  // 最大长度比例
+        const randomRatio = minLengthRatio + Math.random() * (maxLengthRatio - minLengthRatio);
+        const length = Math.sqrt(dx * dx + dy * dy) * randomRatio;
+        
+        // 添加新流星
+        meteors.push({
+          x: startX,
+          y: startY,
+          endX: endX,
+          endY: endY,
+          size,
+          length,
+          speed,
+          angle,
+          alpha,
+          color,
+          distanceTraveled: 0,
+          totalDistance: Math.sqrt(dx * dx + dy * dy)
+        });
+        
+        lastMeteorTime = currentTime;
+      }
+    }
+
+    // 绘制流星
+    function drawMeteors(currentTime) {
+      // 生成新流星
+      spawnMeteor(currentTime);
+      
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      
+      // 更新和绘制每个流星
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const meteor = meteors[i];
+        
+        // 更新位置
+        const moveX = Math.cos(meteor.angle) * meteor.speed;
+        const moveY = Math.sin(meteor.angle) * meteor.speed;
+        meteor.x += moveX;
+        meteor.y += moveY;
+        meteor.distanceTraveled += Math.sqrt(moveX * moveX + moveY * moveY);
+        
+        // 当流星到达终点时移除
+        if (meteor.distanceTraveled >= meteor.totalDistance) {
+          meteors.splice(i, 1);
+          continue;
+        }
+        
+        // 流星尾迹（从头部向后延伸）
+        const tailX = meteor.x - Math.cos(meteor.angle) * meteor.length;
+        const tailY = meteor.y - Math.sin(meteor.angle) * meteor.length;
+        
+        // 创建尾迹渐变
+        const gradient = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        gradient.addColorStop(0.6, `${meteor.color.replace('1)', `${meteor.alpha * 0.6})`)}`);
+        gradient.addColorStop(1, `${meteor.color.replace('1)', `${meteor.alpha})`)}`);
+        
+        // 绘制尾迹
+        ctx.beginPath();
+        ctx.moveTo(meteor.x, meteor.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = meteor.size;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        
+        // 绘制流星头部
+        ctx.beginPath();
+        ctx.arc(meteor.x, meteor.y, meteor.size * 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = meteor.color;
+        ctx.fill();
+        
+        // 添加头部光晕
+        ctx.beginPath();
+        ctx.arc(meteor.x, meteor.y, meteor.size * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `${meteor.color.replace('1)', `${meteor.alpha * 0.2})`)}`;
+        ctx.fill();
+      }
+      
+      ctx.restore();
+    }
+
+    const center = {x: W/2, y: H/2};
+    const ringRadius = Math.min(W,H)*0.35;
+    const particles = PARTICLES.map((p,i)=>{
+      let extraOffset = 0;
+      if (p.id === 0) {
+        extraOffset = 80;
+      } else if (p.id === 3) {
+        extraOffset = 80;
+      }
+      
+      let angle;
+      if (p.id === 0) {
+        angle = (-1 * Math.PI) + (Math.random()-0.5)*0.2;
+      } else if (p.id === 3) {
+        angle = (2 * Math.PI) + (Math.random()-0.5)*0.2;
+      } else {
+        angle = (i/ PARTICLES.length) * Math.PI*2 + (Math.random()-0.5)*0.3;
+      }
+      
+      const baseX = center.x + Math.cos(angle)* (ringRadius + extraOffset + (Math.random()-0.5)*50);
+      const baseY = center.y + Math.sin(angle)* (ringRadius + (Math.random()-0.5)*30);
+      return Object.assign({}, p, {
+        angle, baseX, baseY, x:baseX, y:baseY,
+        size: 20 + Math.random()*12,
+        hover:false, 
+        orbitOffset:Math.random()*1000,
+        pulse: 0
+      });
+    });
+
+    particles.forEach((p,idx)=>{
+      const el = document.createElement('button');
+      el.className = 'label';
+      el.type = 'button';
+      el.innerHTML = `<div style="font-weight:600">${p.title}</div><div style='font-size:13px;color:#ffffff;margin-top:5px;'>点击查看</div>`;
+      el.style.opacity = '0';
+      el.dataset.index = idx;
+      
+      el.addEventListener('mouseenter', ()=>{
+        focused = idx; 
+        hoverParticle(idx);
+        el.classList.add('focus-visible');
+      });
+      
+      el.addEventListener('mouseleave', ()=>{
+        hoverParticle(null);
+        el.classList.remove('focus-visible');
+      });
+      
+      el.addEventListener('click', ()=>{
+        window.location.href = p.url;
+      });
+      
+      el.addEventListener('focus', ()=>{
+        el.classList.add('focus-visible');
+      });
+      
+      el.addEventListener('blur', ()=>{
+        el.classList.remove('focus-visible');
+      });
+      
+      labelsRoot.appendChild(el);
+      p._el = el;
+    });
+
+    let mouse = {x:-9999,y:-9999};
+    let focused = null;
+
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'ArrowRight' || e.key==='ArrowDown'){ 
+        focused = (focused === null) ? 0 : (focused+1)%particles.length; 
+        scrollToParticle(focused);
+      }
+      if(e.key === 'ArrowLeft' || e.key==='ArrowUp'){ 
+        focused = (focused===null)? particles.length-1 : (focused-1+particles.length)%particles.length; 
+        scrollToParticle(focused); 
+      }
+      if(e.key === 'Enter' && focused !== null){ 
+        window.location.href = particles[focused].url;
+      }
+    });
+
+    function scrollToParticle(i){ 
+      const p = particles[i]; 
+      if(!p) return; 
+      hoverParticle(i); 
+      p._el.focus(); 
+    }
+    
+    function hoverParticle(i){ 
+      particles.forEach((p,idx)=>{
+        p.hover = (i===idx);
+        if(i!==idx) p.pulse = 0;
+      });
+    }
+
+    canvas.addEventListener('mousemove', (e)=>{
+      const r = canvas.getBoundingClientRect(); 
+      mouse.x = e.clientX - r.left; 
+      mouse.y = e.clientY - r.top; 
+      detectHover();
+    });
+    
+    canvas.addEventListener('mouseleave', ()=>{ 
+      mouse.x=-9999; 
+      mouse.y=-9999; 
+      hoverParticle(null); 
+      document.querySelectorAll('.label').forEach(el => {
+        el.classList.remove('focus-visible');
+      });
+    });
+
+    function detectHover(){ 
+      let found=null; 
+      for(let i=0;i<particles.length;i++){ 
+        const p=particles[i]; 
+        const d = Math.hypot(p.x-mouse.x,p.y-mouse.y); 
+        if(d < Math.max(30,p.size*1.5)){ 
+          found = i; 
+          break; 
+        } 
+      } 
+      focused = found; 
+      hoverParticle(found); 
+    }
+
+    // 绘制星云背景
+    function drawNebulas(t) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      
+      nebulas.forEach(nebula => {
+        const x = nebula.x + Math.sin(t * nebula.speed) * 20;
+        const y = nebula.y + Math.cos(t * nebula.speed) * 15;
+        
+        const gradient = ctx.createRadialGradient(
+          x, y, 0,
+          x, y, nebula.size
+        );
+        gradient.addColorStop(0, nebula.color);
+        gradient.addColorStop(0.5, `${nebula.color.replace('0.1', '0.05').replace('0.08', '0.04').replace('0.05', '0.025')}`);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, nebula.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      ctx.restore();
+    }
+
+    // 绘制星环
+    function drawRing() {
+      const ringSize = Math.min(W, H) * 0.55;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, ringSize, 0, Math.PI * 2);
+      
+      const ringGradient = ctx.createLinearGradient(
+        center.x - ringSize, center.y,
+        center.x + ringSize, center.y
+      );
+      ringGradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+      ringGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+      ringGradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+      
+      ctx.strokeStyle = ringGradient;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      for (let i = 0; i < 100; i++) {
+        const angle = (i / 100) * Math.PI * 2;
+        const distance = ringSize + (Math.random() - 0.5) * 5;
+        const x = center.x + Math.cos(angle) * distance;
+        const y = center.y + Math.sin(angle) * distance;
+        const size = Math.random() * 1.2;
+        
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.1 + Math.random() * 0.2})`;
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function loop(now){
+      const dt = now - last; 
+      last = now;
+      const t = now/1000;
+      
+      center.x = canvas.width/dpr/2; 
+      center.y = canvas.height/dpr/2;
+      
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle = '#050510'; 
+      ctx.fillRect(0,0,W,H);
+
+      drawNebulas(t);
+
+      ctx.save(); 
+      ctx.globalCompositeOperation = 'lighter';
+      for(const s of stars){
+        s.x += s.vx;
+        s.y += s.vy;
+        
+        if(s.x < 0) s.x = W;
+        if(s.x > W) s.x = 0;
+        if(s.y < 0) s.y = H;
+        if(s.y > H) s.y = 0;
+        
+        let a = s.a;
+        if(s.flicker) {
+          a = s.a * (0.7 + 0.3 * Math.sin(t * 3 + s.phase));
+        } else {
+          a = s.a * (0.8 + 0.2 * Math.sin(t + s.phase));
+        }
+        
+        const gradient = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 2);
+        gradient.addColorStop(0, s.color || `rgba(255,255,255,${a})`);
+        gradient.addColorStop(0.5, s.color ? `${s.color.replace('1)', `${a * 0.6})`)}` : `rgba(255,255,255,${a * 0.6})`);
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        
+        ctx.beginPath(); 
+        ctx.fillStyle = gradient; 
+        ctx.arc(s.x, s.y, s.r * 2, 0, Math.PI*2); 
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // 绘制星环
+      drawRing();
+
+      const coreRadius = Math.min(W,H)*0.15;
+      
+      particles.forEach(p => {
+        if(p.hover) {
+          p.pulse = 0.5 + 0.5 * Math.sin(t * 3);
+        } else {
+          p.pulse = Math.max(0, p.pulse - 0.05);
+        }
+      });
+      
+      for(let i=0;i<particles.length;i++){
+        const p = particles[i];
+        const bx = p.baseX + Math.sin((t*0.6)+p.orbitOffset)*8;
+        const by = p.baseY + Math.cos((t*0.8)+p.orbitOffset*0.7)*6;
+        p.x = bx; 
+        p.y = by;
+
+        const dist = Math.hypot(p.x-center.x,p.y-center.y);
+        let alpha = 0.1 + 0.15 * Math.max(0, 1 - dist / (Math.min(W,H)*0.7));
+        if(p.hover) alpha = Math.min(1.0, alpha + 0.7);
+        
+        const pulseEffect = p.hover ? 0.6 + p.pulse * 0.4 : 0.2;
+
+        ctx.save();
+        const grad = ctx.createLinearGradient(center.x,center.y,p.x,p.y);
+        grad.addColorStop(0, `rgba(255,255,255,${0.2 + alpha*0.2 * pulseEffect})`);
+        grad.addColorStop(1, `rgba(255,255,255,${0.3 + alpha * pulseEffect})`);
+        ctx.strokeStyle = grad; 
+        ctx.lineWidth = p.hover ? 4.0 : 1.2;
+        ctx.lineCap = 'round';
+        ctx.setLineDash([]);
+        
+        ctx.beginPath(); 
+        ctx.moveTo(center.x,center.y); 
+        ctx.lineTo(p.x,p.y); 
+        ctx.stroke(); 
+        ctx.restore();
+
+        ctx.save();
+        const scale = p.hover?1.5:1.0;
+        const size = p.size * scale;
+        
+        const particleGradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 3);
+        particleGradient.addColorStop(0, `rgba(255,255,255,${0.9 * (p.hover ? 1.0 : 0.3)})`);
+        particleGradient.addColorStop(0.2, `rgba(255,255,255,${0.7 * (p.hover ? 1.0 : 0.25)})`);
+        particleGradient.addColorStop(0.5, `rgba(255,255,255,${0.3 * (p.hover ? 1.0 : 0.2)})`);
+        particleGradient.addColorStop(1, 'rgba(255,255,255,0)');
+        
+        ctx.fillStyle = particleGradient; 
+        ctx.beginPath(); 
+        ctx.arc(p.x, p.y, size * 2.2, 0, Math.PI*2); 
+        ctx.fill();
+        
+        const coreGradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, Math.max(3.2, size * 0.65));
+        coreGradient.addColorStop(0, p.hover ? '#ffffff' : 'rgba(255,255,255,0.9)');
+        coreGradient.addColorStop(1, p.hover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.5)');
+        
+        ctx.beginPath(); 
+        ctx.fillStyle = coreGradient; 
+        ctx.arc(p.x, p.y, Math.max(3.2, size * 0.65), 0, Math.PI*2); 
+        ctx.fill();
+        ctx.restore();
+
+        if(p._el){ 
+          p._el.style.left = (p.x) + 'px'; 
+          p._el.style.top = (p.y - 45) + 'px'; 
+          p._el.style.opacity = '1';
+          
+          if(p.hover){ 
+            p._el.style.transform = 'translate(-50%,-50%) scale(1.15)'; 
+            p._el.style.boxShadow = '0 10px 30px rgba(0,0,0,0.6)'; 
+          } else { 
+            p._el.style.transform = 'translate(-50%,-50%) scale(1)'; 
+            p._el.style.boxShadow = 'none'; 
+          } 
+        }
+      }
+
+      // 绘制流星
+      drawMeteors(now);
+
+      const rot = (now/6500) % (Math.PI*2);
+      const maxR = coreRadius*1.6;
+      
+      const coreGradient = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, maxR);
+      coreGradient.addColorStop(0, 'rgba(255,255,255,0.95)');
+      coreGradient.addColorStop(0.2, 'rgba(255,255,255,0.7)');
+      coreGradient.addColorStop(0.4, 'rgba(255,255,255,0.3)');
+      coreGradient.addColorStop(0.6, 'rgba(255,255,255,0.1)');
+      coreGradient.addColorStop(1, 'rgba(255,255,255,0)');
+      
+      ctx.save(); 
+      ctx.fillStyle = coreGradient; 
+      ctx.beginPath(); 
+      ctx.arc(center.x, center.y, coreRadius, 0, Math.PI*2); 
+      ctx.fill(); 
+      ctx.restore();
+
+      ctx.save();
+      const innerCoreGradient = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, coreRadius * 0.42);
+      innerCoreGradient.addColorStop(0, 'rgba(255,255,255,1)');
+      innerCoreGradient.addColorStop(1, 'rgba(255,255,255,0.7)');
+      
+      ctx.beginPath(); 
+      ctx.fillStyle = innerCoreGradient; 
+      ctx.arc(center.x, center.y, coreRadius * 0.42, 0, Math.PI*2); 
+      ctx.fill();
+      
+      ctx.translate(center.x, center.y); 
+      ctx.rotate(rot); 
+      ctx.beginPath(); 
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.ellipse(0, -coreRadius*0.18, coreRadius*0.9, coreRadius*0.22, 0, 0, Math.PI*2); 
+      ctx.fill(); 
+      ctx.restore();
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>
+    

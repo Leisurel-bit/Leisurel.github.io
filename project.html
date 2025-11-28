@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>项目经验 - 刘子硕</title>
+  <style>
+    /* 基础样式：继承主页面银河风格 */
+    :root{
+      --bg:#050510; 
+      --fg:#e8e8e8; 
+      --muted:#9b9b9b; 
+      --glass:rgba(255,255,255,0.06);
+      --accent:#ffffff;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      --border-color: rgba(255,255,255,0.08);
+      /* 银河色调 */
+      --nebula-purple: rgba(100, 50, 200, 0.1);
+      --nebula-blue: rgba(50, 100, 200, 0.08);
+      --nebula-pink: rgba(200, 50, 150, 0.05);
+      /* 新增变量 */
+      --hover-scale: 1.01;
+      --transition-speed: 0.3s;
+      --section-gap: 80px;
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --project-border-radius: 12px;
+      --category-indicator: rgba(100, 50, 200, 0.6);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;}
+    .stage{position:relative;width:100%;min-height:100vh;overflow:hidden;}
+    canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;}
+
+    /* 顶部导航 */
+    .navbar{
+      position:sticky;top:0;z-index:20;padding:16px 24px;
+      background:var(--card-bg);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border-color);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .nav-title{font-size:18px;font-weight:600;color:var(--accent);}
+    .back-btn{
+      padding:8px 16px;border-radius:8px;
+      background:var(--glass);border:1px solid var(--border-color);
+      color:var(--fg);cursor:pointer;transition:all 0.2s;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .back-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+
+    /* 页面内容容器 */
+    .page-container{
+      position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:40px 24px;
+    }
+
+    /* 标题区域 */
+    .page-header{margin-bottom:60px;text-align:center;}
+    .page-title{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;}
+    .page-subtitle{font-size:16px;color:var(--muted);max-width:600px;margin:0 auto;}
+
+    /* 项目分类切换 */
+    .project-tabs{
+      display:flex;
+      justify-content:center;
+      gap:16px;
+      margin-bottom:40px;
+    }
+    .project-tab{
+      padding:10px 24px;
+      background:var(--glass);
+      border:1px solid var(--border-color);
+      border-radius:24px;
+      color:var(--muted);
+      cursor:pointer;
+      transition:all 0.3s;
+      font-weight:500;
+    }
+    .project-tab.active{
+      background:var(--nebula-purple);
+      color:var(--accent);
+      border-color:rgba(100, 50, 200, 0.3);
+    }
+    .project-tab:hover:not(.active){
+      background:rgba(255,255,255,0.1);
+    }
+
+    /* 通用章节样式 */
+    .section{
+      margin-bottom:var(--section-gap);
+      scroll-margin-top:100px;
+      display:none;
+    }
+    .section.active{
+      display:block;
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform: translateY(10px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+
+    .section-title{
+      font-size:26px;font-weight:700;color:var(--accent);
+      margin-bottom:30px;
+      padding-bottom:12px;
+      border-bottom:1px solid var(--border-color);
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .section-title i{
+      opacity:0.8;
+      font-size:22px;
+    }
+
+    /* 项目列表和项目卡片样式 */
+    .projects-list{
+      display:flex;
+      flex-direction:column;
+      gap:30px;
+    }
+
+    .project-card{
+      position:relative;
+      padding:30px;
+      background:var(--card-bg);
+      border:1px solid var(--border-color);
+      border-radius:var(--project-border-radius);
+      box-shadow:var(--card-shadow);
+      transition:var(--transition-speed);
+    }
+    .project-card:hover{
+      transform:var(--hover-scale);
+      border-color:rgba(255,255,255,0.15);
+    }
+    .project-card::before{
+      content:'';
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:4px;
+      background:var(--category-indicator);
+      border-radius:4px 0 0 4px;
+    }
+
+    .project-header{
+      margin-bottom:16px;
+    }
+
+    .project-title{
+      font-size:20px;
+      font-weight:600;
+      color:var(--accent);
+      margin-bottom:8px;
+    }
+
+    .project-status{
+      display:inline-block;
+      font-size:12px;
+      padding:3px 10px;
+      border-radius:4px;
+      background:var(--glass);
+      color:var(--muted);
+      margin-bottom:16px;
+    }
+
+    .project-content{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .project-description, .project-details, .project-results, .project-achievements{
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .project-section-title{
+      font-size:15px;
+      font-weight:600;
+      color:var(--accent);
+      margin-bottom:6px;
+      display:block;
+    }
+
+    /* 响应式适配 */
+    @media (max-width:760px){
+      .page-title{font-size:26px;}
+      .page-container{padding:30px 16px;}
+      .section-title{font-size:22px;}
+      .project-tabs{flex-wrap:wrap;}
+      .project-tab{padding:8px 16px;font-size:14px;}
+      .project-card{padding:20px;}
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="stage">
+    <!-- 银河背景Canvas -->
+    <canvas id="galaxy" aria-hidden="true"></canvas>
+
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+      <div class="nav-title">项目经验</div>
+      <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回主页
+      </a>
+    </nav>
+
+    <!-- 页面主要内容 -->
+    <div class="page-container">
+      <div class="page-header">
+        <h1 class="page-title">我的研究项目</h1>
+        <p class="page-subtitle">算法研究与数据分析的实践成果，探索智能交通的前沿应用</p>
+      </div>
+
+      <!-- 项目分类标签 -->
+      <div class="project-tabs">
+        <div class="project-tab active" data-tab="algorithm">算法项目</div>
+        <div class="project-tab" data-tab="data">数据分析项目</div>
+      </div>
+
+      <!-- 算法项目部分 -->
+      <section class="section active" id="algorithm">
+        <h2 class="section-title">
+          <i class="fas fa-code"></i> 算法项目
+        </h2>
+        <div class="projects-list">
+          <!-- 算法项目1 -->
+          <div class="project-card">
+            <div class="project-header">
+              <h3 class="project-title">融合实时驾驶风格的车辆运动状态深度学习预测</h3>
+              <span class="project-status">在研项目</span>
+            </div>
+            <div class="project-content">
+              <div>
+                <span class="project-section-title">项目概述</span>
+                <p class="project-description">使用LSTM算法和Attention注意力机制，利用目标车辆和环境车辆的历史状态信息以及目标车辆近期驾驶风格，来预测车辆在跟驰和换道行为下的位置、速度。</p>
+              </div>
+              <div>
+                <span class="project-section-title">算法核心</span>
+                <p class="project-details">利用随机森林算法对跟驰行为进行风格聚类，利用图聚类算法对换道行为进行风格聚类，将驾驶风格以独热编码的形式（one-hot）作为先验信息输入给神经网络算法；构建融合时间、空间、风格attention和LSTM(长短期记忆神经网络)的算法结构。</p>
+              </div>
+              <div>
+                <span class="project-section-title">研究意义</span>
+                <p class="project-results">将实时驾驶风格作为先验信息融入深度学习，提高了预测准确度和可算法的解释性；</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 算法项目2 -->
+          <div class="project-card">
+            <div class="project-header">
+              <h3 class="project-title">计算机视觉目标检测：沥青路面病害图像自动识别</h3>
+            </div>
+            <div class="project-content">
+              <div>
+                <p class="project-description">使用yolo和基于transformer的RTDETR算法对RDD2022挪威数据集进行路面病害目标自动识别，对车辆行驶视角拍到的2914 张照片和病害标签进行数据分布描述，从mAP@0.5、mAP@0.5:0.9、召回率、精确度等指标进行效果评判，进行对比分析，并提出改进方案。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 算法项目3 -->
+          <div class="project-card">
+            <div class="project-header">
+              <h3 class="project-title">智能网联环境下的交叉口直右车道信控研究</h3>
+            </div>
+            <div class="project-content">
+              <div>
+                <span class="project-section-title">项目概述</span>
+                <p class="project-description">基于蚁群算法（Ant Colony Optimization，ACO）提出了智能网联环境下时变直右车道方案，对比动态直行右转车道（Dynamic Straight-Right Lane）预信号控制方案，并通过vissim交通流仿真实验验证了两种方案的可行性，并探讨了不同车流量和直右比例下的适用性。</p>
+              </div>
+              <div>
+                <span class="project-section-title">研究结论</span>
+                <p class="project-results">研究表明，从平均速度和平均延误两个指标来看，两种方案均可以提升直行车辆和右转车辆的行驶效率；</p>
+              </div>
+              <div>
+                <span class="project-section-title">成果产出</span>
+                <p class="project-achievements">Physica A（SCI二区）共同作者，一项专利发明共同发明人，本科毕业论文</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 数据分析项目部分 -->
+      <section class="section" id="data">
+        <h2 class="section-title">
+          <i class="fas fa-chart-line"></i> 数据分析项目
+        </h2>
+        <div class="projects-list">
+          <!-- 数据分析项目1 -->
+          <div class="project-card">
+            <div class="project-header">
+              <h3 class="project-title">交通安全：美国Colorado交通数据相关性分析</h3>
+            </div>
+            <div class="project-content">
+              <p class="project-description">绘制不同路面条件下的车速箱型图，利用python中statsmodels完成降雨和降雪条件下的车速ANOVA检验以及周中周末的车速ANOVA检验，从组内平方和、组间平方和、F-statistic，P-value显著性水平等角度对33w条交通数据进行分析，并对数据结果进行解释说明，产出完整的数据分析报告</p>
+            </div>
+          </div>
+
+          <!-- 数据分析项目2 -->
+          <div class="project-card">
+            <div class="project-header">
+              <h3 class="project-title">3D点云数据分析：轨道线型恢复及道路交叉口路面模型重构与精度分析</h3>
+            </div>
+            <div class="project-content">
+              <div>
+                <span class="project-section-title">数据采集与处理</span>
+                <p class="project-description">大疆M300RTK无人机倾斜摄影技术获取地面影像数据，并进行实景模型构建。使用ContextCapture对航拍数据进行空三解算和点云重建，使用Cloud Compare对点云数据进行降采样和滤波，使用RhinoResurf曲面拟合，使用python的open3D、sklearn库进行线型提取、边界提取、曲面拟合。</p>
+              </div>
+              <div>
+                <span class="project-section-title">精度分析</span>
+                <p class="project-results">Rmse（均方误差）在厘米级，r方（相关系数）均在0.97以上。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 银河背景JS -->
+  <script>
+    // 银河背景效果
+    (function(){
+      const canvas = document.getElementById('galaxy');
+      const ctx = canvas.getContext('2d');
+      let W = window.innerWidth, H = window.innerHeight, dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      // 定义星云和星星数据
+      const nebulas = [
+        {x: W*0.2, y: H*0.3, size: W*0.6, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-purple')},
+        {x: W*0.7, y: H*0.6, size: W*0.5, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-blue')},
+        {x: W*0.5, y: H*0.2, size: W*0.4, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-pink')}
+      ];
+
+      const stars = [
+        ...Array.from({length:80}).map(()=>({
+          type:'tiny',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:Math.random()*0.8,
+          a:0.2+Math.random()*0.6,
+          color: 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:50}).map(()=>({
+          type:'medium',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:0.8+Math.random()*1.2,
+          a:0.4+Math.random()*0.7,
+          color: Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:20}).map(()=>({
+          type:'bright',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:1.5+Math.random()*2,
+          a:0.7+Math.random()*0.3,
+          color: Math.random() > 0.7 ? 'rgba(255,240,220,1)' : 
+                 Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        }))
+      ];
+
+      // 绘制函数
+      function drawNebulas(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        nebulas.forEach(neb=>{
+          const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.size);
+          grad.addColorStop(0, neb.color);
+          grad.addColorStop(0.5, neb.color.replace(/0\.\d+/, '0.05'));
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.arc(neb.x, neb.y, neb.size, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawStars(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        stars.forEach(s=>{
+          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*2);
+          grad.addColorStop(0, `${s.color.replace('1)', `${s.a})`)}`);
+          grad.addColorStop(0.5, `${s.color.replace('1)', `${s.a*0.6})`)}`);
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          
+          ctx.fillStyle = grad;
+          ctx.arc(s.x, s.y, s.r*2, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawGalaxy(){
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0,0,W,H);
+        drawNebulas();
+        drawStars();
+      }
+
+      // Resize和初始化逻辑
+      function resize(){
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        drawGalaxy();
+      }
+
+      // 初始化执行
+      resize();
+      window.addEventListener('resize', resize);
+    })();
+
+    // 项目分类标签切换
+    document.querySelectorAll('.project-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // 移除所有标签的active类
+        document.querySelectorAll('.project-tab').forEach(t => {
+          t.classList.remove('active');
+        });
+        // 给当前点击的标签添加active类
+        tab.classList.add('active');
+        
+        // 隐藏所有内容
+        document.querySelectorAll('.section').forEach(content => {
+          content.classList.remove('active');
+        });
+        // 显示对应的内容
+        const tabId = tab.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
+    

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人AI助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#EC4899',
+                        neutral: '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .chat-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+            .avatar-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.7;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-12">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-neutral mb-4">我的个人AI助手</h1>
+            <p class="text-slate-600 text-lg max-w-2xl mx-auto">点击下方开始聊天，我随时为你提供帮助</p>
+        </header>
+
+        <!-- 聊天机器人主体 -->
+        <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+            <!-- 个人形象 -->
+            <div class="relative">
+                <div class="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white shadow-xl avatar-pulse">
+                    <img src="https://picsum.photos/seed/person/400/400" alt="个人形象照片" class="w-full h-full object-cover">
+                </div>
+                <div class="absolute bottom-4 right-4 bg-green-500 w-6 h-6 rounded-full border-2 border-white"></div>
+            </div>
+
+            <!-- 聊天区域 -->
+            <div id="chat-container" class="w-full md:w-2/3 bg-white rounded-2xl chat-shadow overflow-hidden transform transition-all duration-300">
+                <!-- 聊天头部 -->
+                <div class="bg-primary text-white p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-comments text-xl"></i>
+                        <h2 class="text-xl font-semibold">聊天助手</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="hover:bg-primary-700 p-2 rounded-full transition-colors">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                        <button class="hover:bg-primary-700 p-2 rounded-full transition-colors">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 聊天内容区域 -->
+                <div id="chat-messages" class="h-80 p-4 overflow-y-auto space-y-4">
+                    <!-- 机器人消息 -->
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <img src="https://picsum.photos/seed/person/400/400" alt="机器人头像" class="w-full h-full object-cover">
+                        </div>
+                        <div class="bg-slate-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                            <p>你好！我是你的个人AI助手，有什么可以帮助你的吗？</p>
+                        </div>
+                    </div>
+
+                    <!-- 可以在这里添加更多消息 -->
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="p-4 border-t border-slate-200">
+                    <div class="flex gap-2">
+                        <input type="text" id="user-input" placeholder="输入消息..." 
+                            class="flex-1 px-4 py-2 rounded-full border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <button id="send-btn" class="bg-primary hover:bg-primary/90 text-white p-2 rounded-full transition-colors">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的聊天功能实现
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+
+            // 发送消息函数
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+
+                // 添加用户消息
+                const userMessageHtml = `
+                    <div class="flex gap-3 justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-none px-4 py-3 max-w-[80%]">
+                            <p>${message}</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <img src="https://picsum.photos/seed/user/400/400" alt="用户头像" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', userMessageHtml);
+
+                // 清空输入框
+                userInput.value = '';
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // 模拟AI回复（实际项目中这里会调用Coze API）
+                setTimeout(() => {
+                    const replies = [
+                        "感谢你的提问，我正在处理这个问题...",
+                        "这个问题很有趣，让我想想...",
+                        "我理解你的意思，关于这个话题...",
+                        "好的，我可以帮你解答这个问题。"
+                    ];
+                    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                    
+                    const aiMessageHtml = `
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                <img src="https://picsum.photos/seed/person/400/400" alt="机器人头像" class="w-full h-full object-cover">
+                            </div>
+                            <div class="bg-slate-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                                <p>${randomReply}</p>
+                            </div>
+                        </div>
+                    `;
+                    chatMessages.insertAdjacentHTML('beforeend', aiMessageHtml);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+
+            // 点击发送按钮
+            sendBtn.addEventListener('click', sendMessage);
+
+            // 按Enter键发送
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
