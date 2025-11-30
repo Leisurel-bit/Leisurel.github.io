@@ -310,6 +310,18 @@
     .sport-desc{
       font-size:14px;color:var(--muted);
     }
+    .sports-extra {
+      margin-top: 24px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: var(--card-bg);  /* 延续原有玻璃卡片风格 */
+      border: 1px solid var(--border-color);
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.6;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+    }
 
     /* 响应式适配 */
     @media (max-width:760px){
@@ -478,81 +490,117 @@
         </div>
       </section>
 
-      <!-- 运动部分 -->
-      <section class="hobby-category" id="sports">
-        <h2 class="hobby-category-title">
-          <i class="fas fa-running"></i> 运动
-        </h2>
-        <div class="sports-grid">
-          <!-- 足球 -->
-          <div class="sport-card">
-            <div class="sport-image">
-              <img src="https://picsum.photos/id/201/600/400" alt="足球运动">
-            </div>
-            <div class="sport-info">
-              <h3 class="sport-name">足球</h3>
-              <p class="sport-desc">每周固定参与业余联赛，司职中场，擅长组织进攻</p>
-            </div>
-          </div>
-          
-          <!-- 骑行 -->
-          <div class="sport-card">
-            <div class="sport-image">
-              <img src="https://picsum.photos/id/202/600/400" alt="骑行运动">
-            </div>
-            <div class="sport-info">
-              <h3 class="sport-name">骑行</h3>
-              <p class="sport-desc">累计骑行距离超10000公里，完成多次单日200公里挑战</p>
-            </div>
-          </div>
-          
-          <!-- 羽毛球 -->
-          <div class="sport-card">
-            <div class="sport-image">
-              <img src="https://picsum.photos/id/203/600/400" alt="羽毛球运动">
-            </div>
-            <div class="sport-info">
-              <h3 class="sport-name">羽毛球</h3>
-              <p class="sport-desc">校队成员，擅长双打，正手扣杀是招牌动作</p>
-            </div>
-          </div>
-          
-          <!-- 网球 -->
-          <div class="sport-card">
-            <div class="sport-image">
-              <img src="https://picsum.photos/id/204/600/400" alt="网球运动">
-            </div>
-            <div class="sport-info">
-              <h3 class="sport-name">网球</h3>
-              <p class="sport-desc">每周两次练习，偏好红土场地，反手技术见长</p>
-            </div>
-          </div>
-          
-          <!-- 乒乓球 -->
-          <div class="sport-card">
-            <div class="sport-image">
-              <img src="https://picsum.photos/id/205/600/400" alt="乒乓球运动">
-            </div>
-            <div class="sport-info">
-              <h3 class="sport-name">乒乓球</h3>
-              <p class="sport-desc">横拍打法，擅长弧圈球，曾获市级业余组前八</p>
-            </div>
-          </div>
-          
-          <!-- 冲浪 -->
-          <div class="sport-card">
-            <div class="sport-image">
-              <img src="https://picsum.photos/id/206/600/400" alt="冲浪运动">
-            </div>
-            <div class="sport-info">
-              <h3 class="sport-name">冲浪</h3>
-              <p class="sport-desc">每年假期前往冲浪胜地练习，可完成多种进阶动作</p>
-            </div>
-          </div>
-        </div>
-      </section>
+     <!-- 运动部分（升级为 9 项） -->
+<section class="hobby-category" id="sports">
+  <h2 class="hobby-category-title">
+    <i class="fas fa-running"></i> 运动
+  </h2>
+
+  <div class="sports-grid">
+    <!-- 足球 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/1.jpg" alt="足球">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">足球</h3>
+        <p class="sport-desc">司职左边锋，速度型前锋</p>
+      </div>
+    </div>
+
+    <!-- 骑行 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/2.jpg" alt="骑行">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">骑行</h3>
+        <p class="sport-desc">公路车爱好者，喜欢骑行的自由感</p>
+      </div>
+    </div>
+
+    <!-- 游泳 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/3.jpg" alt="游泳">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">游泳</h3>
+        <p class="sport-desc">游泳爱好者，锻炼心肺能力</p>
+      </div>
+    </div>
+
+    <!-- 滑板 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/4.jpg" alt="滑板">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">滑板</h3>
+        <p class="sport-desc">喜欢drop in、泵道，Ollie学习中</p>
+      </div>
+    </div>
+
+    <!-- 台球 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/5.jpg" alt="台球">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">台球</h3>
+        <p class="sport-desc">休闲打法</p>
+      </div>
+    </div>
+
+    <!-- 户外 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/6.jpg" alt="户外">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">户外</h3>
+        <p class="sport-desc">热爱大自然</p>
+      </div>
+    </div>
+
+    <!-- 徒步 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/7.jpg" alt="徒步">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">徒步</h3>
+        <p class="sport-desc">和朋友一起城市徒步</p>
+      </div>
+    </div>
+
+    <!-- 冲浪 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/8.jpg" alt="冲浪">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">冲浪</h3>
+        <p class="sport-desc">试过一次就再也忘不掉的感觉</p>
+      </div>
+    </div>
+
+    <!-- 高尔夫 -->
+    <div class="sport-card">
+      <div class="sport-image">
+        <img src="images/sports/9.jpg" alt="高尔夫">
+      </div>
+      <div class="sport-info">
+        <h3 class="sport-name">高尔夫</h3>
+        <p class="sport-desc">初步尝试过，希望未来有机会多打</p>
+      </div>
+    </div>
+    <!-- 其他运动说明 -->
+    <div class="sports-extra">
+      还可以玩羽毛球、乒乓球，另外网球、攀岩、匹克球正在学习中。
     </div>
   </div>
+</section>
 
   <!-- 银河背景JS -->
   <script>
@@ -655,5 +703,6 @@
   </script>
 </body>
 </html>
+
 
 
