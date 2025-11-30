@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>摄影作品集 - 刘子硕</title>
+  <style>
+    /* 基础样式：继承主页面银河风格 */
+    :root{
+      --bg:#050510; 
+      --fg:#e8e8e8; 
+      --muted:#9b9b9b; 
+      --glass:rgba(255,255,255,0.06);
+      --accent:#ffffff;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      --border-color: rgba(255,255,255,0.08);
+      --nebula-purple: rgba(100, 50, 200, 0.1);
+      --nebula-blue: rgba(50, 100, 200, 0.08);
+      --nebula-pink: rgba(200, 50, 150, 0.05);
+      --hover-scale: 1.03;
+      --transition-speed: 0.3s;
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --card-shadow-hover: 0 15px 40px rgba(0,0,0,0.6);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;}
+    .stage{position:relative;width:100%;min-height:100vh;overflow:hidden;}
+    canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;}
+
+    /* 顶部导航 */
+    .navbar{
+      position:sticky;top:0;z-index:20;padding:16px 24px;
+      background:var(--card-bg);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border-color);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .nav-title{font-size:18px;font-weight:600;color:var(--accent);}
+    .back-btn{
+      padding:8px 16px;border-radius:8px;
+      background:var(--glass);border:1px solid var(--border-color);
+      color:var(--fg);cursor:pointer;transition:all 0.2s;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .back-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+
+    /* 页面内容容器 */
+    .page-container{
+      position:relative;z-index:10;max-width:1200px;margin:0 auto;padding:40px 24px 80px;
+    }
+
+    /* 标题区域 */
+    .page-header{margin-bottom:40px;text-align:center;}
+    .page-title{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;}
+    .page-subtitle{font-size:16px;color:var(--muted);max-width:620px;margin:0 auto;}
+
+    /* 分类标题 */
+    .gallery-section{
+      margin-bottom:70px;
+      scroll-margin-top:90px;
+    }
+    .gallery-title{
+      font-size:24px;
+      font-weight:700;
+      color:var(--accent);
+      margin-bottom:18px;
+      display:flex;
+      align-items:flex-end;
+      gap:12px;
+    }
+    .gallery-title span.en{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:400;
+    }
+
+    /* 分类卡片容器 */
+    .gallery-card{
+      background:var(--card-bg);
+      border-radius:18px;
+      border:1px solid var(--border-color);
+      box-shadow:var(--card-shadow);
+      padding:22px 22px 26px;
+      transition:var(--transition-speed);
+    }
+    .gallery-card:hover{
+      transform:translateY(-4px);
+      box-shadow:var(--card-shadow-hover);
+      border-color:rgba(255,255,255,0.15);
+    }
+
+    /* 图片网格：每张 1:1 自动裁剪 */
+    .photo-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+      gap:14px;
+    }
+    @media (max-width:760px){
+      .photo-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+    .photo-item{
+      position:relative;
+      border-radius:12px;
+      overflow:hidden;
+      background:#111;
+      aspect-ratio:1 / 1;  /* 这里强制展示为 1:1 */
+    }
+    .photo-item img{
+      width:100%;
+      height:100%;
+      object-fit:cover;    /* 自动裁剪，只展示居中正方形部分 */
+      transition:transform 0.5s ease, opacity 0.5s ease;
+      opacity:0.94;
+    }
+    .photo-item:hover img{
+      transform:scale(1.06);
+      opacity:1;
+    }
+    .photo-item-placeholder{
+      border:1px dashed rgba(255,255,255,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* 分类顶部小说明 */
+    .section-desc{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:16px;
+    }
+
+    /* 底部提示 */
+    .bottom-hint{
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="stage">
+    <!-- 银河背景Canvas -->
+    <canvas id="galaxy" aria-hidden="true"></canvas>
+
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+      <div class="nav-title">摄影作品集</div>
+      <a href="hobbies.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回兴趣页
+      </a>
+    </nav>
+
+    <!-- 页面内容 -->
+    <div class="page-container">
+      <header class="page-header">
+        <h1 class="page-title">我的摄影相册</h1>
+        <p class="page-subtitle">
+          按照题材划分为风光、建筑、人文、动物、植物五类，每一张照片都是一次观察世界的尝试。
+        </p>
+      </header>
+
+      <!-- 1. 风光 -->
+      <section class="gallery-section" id="landscape">
+        <div class="gallery-title">
+          <span>风光</span>
+          <span class="en">Landscape</span>
+        </div>
+        <div class="gallery-card">
+          <p class="section-desc">山川、海岸、云海与日落，记录在路上的风与光。</p>
+          <div class="photo-grid">
+            <!-- 留 10 个位置，后面你可以删掉多余的 -->
+            <div class="photo-item">
+              <img src="images/landscape_01.jpg" alt="风光照片 01">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_02.jpg" alt="风光照片 02">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_03.jpg" alt="风光照片 03">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_04.jpg" alt="风光照片 04">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_05.jpg" alt="风光照片 05">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_06.jpg" alt="风光照片 06">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_07.jpg" alt="风光照片 07">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_08.jpg" alt="风光照片 08">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_09.jpg" alt="风光照片 09">
+            </div>
+            <div class="photo-item">
+              <img src="images/landscape_10.jpg" alt="风光照片 10">
+            </div>
+          </div>
+          <p class="bottom-hint">注：图片路径占位，替换为你在 images/ 目录中的真实文件名即可。</p>
+        </div>
+      </section>
+
+      <!-- 2. 建筑 -->
+      <section class="gallery-section" id="architecture">
+        <div class="gallery-title">
+          <span>建筑</span>
+          <span class="en">Architecture</span>
+        </div>
+        <div class="gallery-card">
+          <p class="section-desc">城市街区、老建筑与现代楼宇，记录人类空间的秩序与想象。</p>
+          <div class="photo-grid">
+            <!-- 预留 10 张建筑照片位置 -->
+            <div class="photo-item">
+              <img src="images/architecture_01.jpg" alt="建筑照片 01">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_02.jpg" alt="建筑照片 02">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_03.jpg" alt="建筑照片 03">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_04.jpg" alt="建筑照片 04">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_05.jpg" alt="建筑照片 05">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_06.jpg" alt="建筑照片 06">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_07.jpg" alt="建筑照片 07">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_08.jpg" alt="建筑照片 08">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_09.jpg" alt="建筑照片 09">
+            </div>
+            <div class="photo-item">
+              <img src="images/architecture_10.jpg" alt="建筑照片 10">
+            </div>
+          </div>
+          <p class="bottom-hint">如果建筑类照片不足 10 张，可以直接删除多余的 photo-item 块。</p>
+        </div>
+      </section>
+
+      <!-- 3. 人文 -->
+      <section class="gallery-section" id="people">
+        <div class="gallery-title">
+          <span>人文</span>
+          <span class="en">People & Culture</span>
+        </div>
+        <div class="gallery-card">
+          <p class="section-desc">街头、旅人、日常生活的片段，记录情绪与故事。</p>
+          <div class="photo-grid">
+            <!-- 预留 10 张人文照片位置 -->
+            <div class="photo-item">
+              <img src="images/people_01.jpg" alt="人文照片 01">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_02.jpg" alt="人文照片 02">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_03.jpg" alt="人文照片 03">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_04.jpg" alt="人文照片 04">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_05.jpg" alt="人文照片 05">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_06.jpg" alt="人文照片 06">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_07.jpg" alt="人文照片 07">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_08.jpg" alt="人文照片 08">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_09.jpg" alt="人文照片 09">
+            </div>
+            <div class="photo-item">
+              <img src="images/people_10.jpg" alt="人文照片 10">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 动物 -->
+      <section class="gallery-section" id="animal">
+        <div class="gallery-title">
+          <span>动物</span>
+          <span class="en">Animals</span>
+        </div>
+        <div class="gallery-card">
+          <p class="section-desc">流浪猫狗、野生动物与偶遇的小生命。</p>
+          <div class="photo-grid">
+            <!-- 预留 10 张动物照片位置 -->
+            <div class="photo-item">
+              <img src="images/animal_01.jpg" alt="动物照片 01">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_02.jpg" alt="动物照片 02">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_03.jpg" alt="动物照片 03">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_04.jpg" alt="动物照片 04">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_05.jpg" alt="动物照片 05">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_06.jpg" alt="动物照片 06">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_07.jpg" alt="动物照片 07">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_08.jpg" alt="动物照片 08">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_09.jpg" alt="动物照片 09">
+            </div>
+            <div class="photo-item">
+              <img src="images/animal_10.jpg" alt="动物照片 10">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. 植物 -->
+      <section class="gallery-section" id="plant">
+        <div class="gallery-title">
+          <span>植物</span>
+          <span class="en">Plants</span>
+        </div>
+        <div class="gallery-card">
+          <p class="section-desc">花草、树木、枝叶细节，让季节在画面中缓慢流动。</p>
+          <div class="photo-grid">
+            <!-- 预留 10 张植物照片位置 -->
+            <div class="photo-item">
+              <img src="images/plant_01.jpg" alt="植物照片 01">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_02.jpg" alt="植物照片 02">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_03.jpg" alt="植物照片 03">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_04.jpg" alt="植物照片 04">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_05.jpg" alt="植物照片 05">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_06.jpg" alt="植物照片 06">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_07.jpg" alt="植物照片 07">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_08.jpg" alt="植物照片 08">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_09.jpg" alt="植物照片 09">
+            </div>
+            <div class="photo-item">
+              <img src="images/plant_10.jpg" alt="植物照片 10">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 银河背景JS：与 hobbies.html 保持一致 -->
+  <script>
+    (function(){
+      const canvas = document.getElementById('galaxy');
+      const ctx = canvas.getContext('2d');
+      let W = window.innerWidth, H = window.innerHeight, dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      const nebulas = [
+        {x: W*0.2, y: H*0.3, size: W*0.6, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-purple')},
+        {x: W*0.7, y: H*0.6, size: W*0.5, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-blue')},
+        {x: W*0.5, y: H*0.2, size: W*0.4, color: getComputedStyle(document.documentElement).getPropertyValue('--nebula-pink')}
+      ];
+
+      const stars = [
+        ...Array.from({length:80}).map(()=>({
+          type:'tiny',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:Math.random()*0.8,
+          a:0.2+Math.random()*0.6,
+          color: 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:50}).map(()=>({
+          type:'medium',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:0.8+Math.random()*1.2,
+          a:0.4+Math.random()*0.7,
+          color: Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        })),
+        ...Array.from({length:20}).map(()=>({
+          type:'bright',
+          x:Math.random()*W,
+          y:Math.random()*H,
+          r:1.5+Math.random()*2,
+          a:0.7+Math.random()*0.3,
+          color: Math.random() > 0.7 ? 'rgba(255,240,220,1)' : 
+                 Math.random() > 0.5 ? 'rgba(220,240,255,1)' : 'rgba(255,255,255,1)'
+        }))
+      ];
+
+      function drawNebulas(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        nebulas.forEach(neb=>{
+          const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.size);
+          grad.addColorStop(0, neb.color);
+          grad.addColorStop(0.5, neb.color.replace(/0\\.\d+/, '0.05'));
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.arc(neb.x, neb.y, neb.size, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawStars(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        stars.forEach(s=>{
+          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*2);
+          grad.addColorStop(0, s.color.replace('1)', s.a + ')'));
+          grad.addColorStop(0.5, s.color.replace('1)', (s.a*0.6) + ')'));
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = grad;
+          ctx.arc(s.x, s.y, s.r*2, 0, Math.PI*2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawGalaxy(){
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0,0,W,H);
+        drawNebulas();
+        drawStars();
+      }
+
+      function resize(){
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        drawGalaxy();
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+    })();
+  </script>
+</body>
+</html>
