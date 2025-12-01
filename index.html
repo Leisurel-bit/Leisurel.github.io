@@ -92,11 +92,39 @@
     /* 底部说明 */
     .hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:12px;color:var(--muted);z-index:5}
 
-    /* 小屏适配 */
+    /* 小屏适配：强制把核心卡片和小星球都缩小一档 */
     @media (max-width:760px){
-      :root{--card-w:86vw}
-      .label{font-size:14px;min-width:140px;padding:10px 12px}
-      .core-card{top:45%}
+    
+      /* 1. 核心卡片整体变窄、变矮、往下走一点 */
+      .core-card{
+        width: 48vw;              /* 直接写死宽度，不再用变量，手机上明显变窄 */
+        padding: 10px 12px;        /* 上下左右内边距都减小，框自然变小 */
+        border-radius: 10px;
+        top: 45%;                  /* 再往下，给上方星球留空间 */
+        transform: translate(-50%, -50%);
+      }
+    
+      .core-title{
+        font-size: 20px;           /* 名字在手机上稍微收一点 */
+      }
+      .core-sub{
+        font-size: 11px;
+        line-height: 1.3;
+        margin-top: 4px;
+      }
+      .core-contact{
+        font-size: 11px;
+        line-height: 1.3;
+        margin-top: 6px;
+      }
+    
+      /* 2. 小星球标签：更紧凑，避免挡住别的星球 */
+      .label{
+        font-size: 12px;
+        min-width: 0;
+        padding: 3px 5px;          /* 边距再缩一点，框就只包住文字 */
+        border-radius: 6px;
+      }
     }
   </style>
 </head>
@@ -707,6 +735,7 @@
 </body>
 </html>
     
+
 
 
 
