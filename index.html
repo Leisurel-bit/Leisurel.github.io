@@ -121,9 +121,11 @@
       /* 2. 小星球标签：更紧凑，避免挡住别的星球 */
       .label{
         font-size: 12px;
-        min-width: 0;
-        padding: 3px 5px;          /* 边距再缩一点，框就只包住文字 */
-        border-radius: 6px;
+        width: 110px;        /* 统一固定宽度，最重要！ */
+        min-width: 110px;    /* 防止被挤缩 */
+        padding: 4px 6px;
+        white-space: nowrap; /* 禁止换行 */
+        text-align: center;
       }
     }
   </style>
@@ -735,6 +737,7 @@
 </body>
 </html>
     
+
 
 
 
