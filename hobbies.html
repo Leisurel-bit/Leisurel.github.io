@@ -203,70 +203,53 @@
       flex-direction:column;
       gap:20px;
     }
-    .article-card{
-      background:var(--card-bg);
-      border:1px solid var(--border-color);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:var(--card-shadow);
-      transition:var(--transition-speed);
-      display:grid;
-      grid-template-columns:200px 1fr;
-      gap:20px;
-    }
-    .article-card:hover{
-      transform:translateY(-5px);
-      box-shadow:var(--card-shadow-hover);
-      border-color:rgba(255,255,255,0.15);
-    }
-    @media (max-width:760px){
-      .article-card{
-        grid-template-columns:1fr;
-      }
-    }
-    .article-image{
-      height:140px;
-      overflow:hidden;
-    }
-    @media (max-width:760px){
-      .article-image{
-        height:200px;
-      }
-    }
-    .article-image img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      transition:transform 0.5s ease;
-    }
-    .article-card:hover .article-image img{
-      transform:scale(1.08);
-    }
-    .article-content{
-      padding:20px;
-      display:flex;
-      flex-direction:column;
-    }
-    .article-title{
-      font-size:18px;font-weight:600;color:var(--accent);
-      margin-bottom:8px;
-      transition:color 0.3s;
-    }
-    .article-card:hover .article-title{
-      color:#ffffff;
-    }
-    .article-excerpt{
-      font-size:14px;color:var(--muted);
-      line-height:1.6;
-      flex:1;
-      margin-bottom:12px;
-    }
-    .article-meta{
-      display:flex;
-      justify-content:space-between;
-      font-size:12px;color:var(--muted);
-    }
+    .article-title a {
+  color: #ffffff;            /* 白色 */
+  font-weight: 700;          /* 加粗 */
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: 0.2s ease;
+}
 
+.article-title a:hover {
+  color: #e0e0e0;            /* 悬浮微亮 */
+  text-decoration: underline;
+}
+.article-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(6px);
+  transition: transform .25s ease;
+  margin-bottom: 20px;
+}
+
+.article-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.article-content {
+  display: flex;
+  flex-direction: column;   /* 竖排，文字自然排布 */
+  gap: 10px;                /* 元素之间留空 */
+}
+
+.article-excerpt {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.article-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+  
     /* 运动部分 */
     .sports-grid{
       display:grid;
@@ -404,12 +387,12 @@
         </h2>
         <div class="writing-container">
           <div class="public-account">
-            <div class="account-qrcode">公众号二维码</div>
+            <img class="account-qrcode" src="images/writing/qrcode1.jpg" alt="公众号二维码">
             <div class="account-name">子硕的思考空间</div>
             <div class="account-desc">分享生活感悟与旅行见闻</div>
-            <a href="#" class="view-more" target="_blank">
-              <i class="fas fa-link"></i> 访问公众号
-            </a>
+            <img class="account-qrcode" src="images/writing/qrcode2.jpg" alt="公众号二维码">
+            <div class="account-name">我创办的团队公众号：温和制噪</div>
+            <div class="account-desc">理想主义的保留地</div>
           </div>
           <div class="articles-list">
             <!-- 文章1 -->
@@ -419,6 +402,8 @@
               </div>
               <div class="article-content">
                 <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <a href="https://mp.weixin.qq.com/s/QfV2kc9GAhaXSzU4OVbdeg" target="_blank">徒步虎跳峡：在悬崖边遇见自己</a>
+                </h3>
                 <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
                 <div class="article-meta">
                   <span><i class="far fa-calendar"></i> 2023-08-15</span>
@@ -426,63 +411,83 @@
                 </div>
               </div>
             </div>
-            
             <!-- 文章2 -->
             <div class="article-card">
               <div class="article-image">
-                <img src="https://picsum.photos/id/102/600/400" alt="文章配图">
+                <img src="https://picsum.photos/id/101/600/400" alt="文章配图">
               </div>
               <div class="article-content">
-                <h3 class="article-title">摄影器材选购指南：从入门到专业</h3>
-                <p class="article-excerpt">详细解析不同价位的相机和镜头选择，适合摄影新手的装备配置建议，以及如何避免不必要的开支。</p>
+                <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <a href="https://mp.weixin.qq.com/s/QfV2kc9GAhaXSzU4OVbdeg" target="_blank">徒步虎跳峡：在悬崖边遇见自己</a>
+                </h3>
+                <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
                 <div class="article-meta">
-                  <span><i class="far fa-calendar"></i> 2023-06-22</span>
-                  <span><i class="far fa-eye"></i> 2.5k阅读</span>
+                  <span><i class="far fa-calendar"></i> 2023-08-15</span>
+                  <span><i class="far fa-eye"></i> 1.2k阅读</span>
                 </div>
               </div>
             </div>
-            
             <!-- 文章3 -->
             <div class="article-card">
               <div class="article-image">
-                <img src="https://picsum.photos/id/103/600/400" alt="文章配图">
+                <img src="https://picsum.photos/id/101/600/400" alt="文章配图">
               </div>
               <div class="article-content">
-                <h3 class="article-title">足球与人生：团队协作的哲学</h3>
-                <p class="article-excerpt">通过多年的足球运动经历，探讨团队协作的重要性，以及如何在竞争中保持友谊，在合作中实现共赢。</p>
+                <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <a href="https://mp.weixin.qq.com/s/QfV2kc9GAhaXSzU4OVbdeg" target="_blank">徒步虎跳峡：在悬崖边遇见自己</a>
+                </h3>
+                <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
                 <div class="article-meta">
-                  <span><i class="far fa-calendar"></i> 2023-05-10</span>
-                  <span><i class="far fa-eye"></i> 986阅读</span>
+                  <span><i class="far fa-calendar"></i> 2023-08-15</span>
+                  <span><i class="far fa-eye"></i> 1.2k阅读</span>
                 </div>
               </div>
             </div>
-            
             <!-- 文章4 -->
             <div class="article-card">
               <div class="article-image">
-                <img src="https://picsum.photos/id/104/600/400" alt="文章配图">
+                <img src="https://picsum.photos/id/101/600/400" alt="文章配图">
               </div>
               <div class="article-content">
-                <h3 class="article-title">深夜骑行：城市另一面的探索</h3>
-                <p class="article-excerpt">记录深夜骑行穿越城市的独特体验，观察到的城市另一面，以及夜间骑行的安全注意事项。</p>
+                <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <a href="https://mp.weixin.qq.com/s/QfV2kc9GAhaXSzU4OVbdeg" target="_blank">徒步虎跳峡：在悬崖边遇见自己</a>
+                </h3>
+                <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
                 <div class="article-meta">
-                  <span><i class="far fa-calendar"></i> 2023-03-18</span>
-                  <span><i class="far fa-eye"></i> 1.8k阅读</span>
+                  <span><i class="far fa-calendar"></i> 2023-08-15</span>
+                  <span><i class="far fa-eye"></i> 1.2k阅读</span>
                 </div>
               </div>
             </div>
-            
             <!-- 文章5 -->
             <div class="article-card">
               <div class="article-image">
-                <img src="https://picsum.photos/id/105/600/400" alt="文章配图">
+                <img src="https://picsum.photos/id/101/600/400" alt="文章配图">
               </div>
               <div class="article-content">
-                <h3 class="article-title">海浪中的思考：冲浪教会我的事</h3>
-                <p class="article-excerpt">从冲浪运动中领悟到的生活哲学，如何面对不确定性，如何在失控中找到平衡，以及对自然的敬畏之心。</p>
+                <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <a href="https://mp.weixin.qq.com/s/QfV2kc9GAhaXSzU4OVbdeg" target="_blank">徒步虎跳峡：在悬崖边遇见自己</a>
+                </h3>
+                <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
                 <div class="article-meta">
-                  <span><i class="far fa-calendar"></i> 2023-01-05</span>
-                  <span><i class="far fa-eye"></i> 3.2k阅读</span>
+                  <span><i class="far fa-calendar"></i> 2023-08-15</span>
+                  <span><i class="far fa-eye"></i> 1.2k阅读</span>
+                </div>
+              </div>
+            </div>
+            <!-- 文章6 -->
+            <div class="article-card">
+              <div class="article-image">
+                <img src="https://picsum.photos/id/101/600/400" alt="文章配图">
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">徒步虎跳峡：在悬崖边遇见自己</h3>
+                <a href="https://mp.weixin.qq.com/s/QfV2kc9GAhaXSzU4OVbdeg" target="_blank">徒步虎跳峡：在悬崖边遇见自己</a>
+                </h3>
+                <p class="article-excerpt">记录了徒步虎跳峡的所见所闻，以及在极限环境中对生命和自然的思考，分享了徒步装备和路线建议。</p>
+                <div class="article-meta">
+                  <span><i class="far fa-calendar"></i> 2023-08-15</span>
+                  <span><i class="far fa-eye"></i> 1.2k阅读</span>
                 </div>
               </div>
             </div>
@@ -703,6 +708,7 @@
   </script>
 </body>
 </html>
+
 
 
 
