@@ -30,17 +30,50 @@
       pointer-events:auto;
       z-index:10;
     }
-    .core-title{font-size:24px;font-weight:700;letter-spacing:0.6px；text-shadow:0 0 12px rgba(255,255,255,0.45);}
-    .core-sub{font-size:13px;color:var(--muted);margin-top:6px}
-    .core-contact{font-size:12px;color:var(--muted);margin-top:10px}
-
+    .core-title{
+          font-size:26px;
+          font-weight:700;
+          letter-spacing:0.6px;
+          color:#fff;
+          text-shadow:
+            0 0 4px #000,
+            0 0 6px #000;
+        }    
+    .core-sub{
+          font-size:12px;
+          color:#ffffff;
+          margin-top:6px;
+          text-shadow:
+            0 0 3px #000,
+            0 0 5px #000;
+        }
+    .core-contact{
+          font-size:11px;
+          color:#ffffff;
+          margin-top:10px;
+          text-shadow:
+            0 0 3px #000,
+            0 0 5px #000;
+        }
     /* 粒子透明文本框 */
     .label{
-      position:absolute;transform:translate(-50%,-50%);min-width:200px;padding:14px 16px;border-radius:10px;
+      position:absolute;
+      transform:translate(-50%,-50%);
+      min-width:90px; /* 缩小一点 */
+      padding:6px 8px; /* 缩小内边距 */
+      border-radius:8px;
       background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-      border:1px solid rgba(255,255,255,0.06);color:var(--fg);font-size:16px;text-align:center;pointer-events:auto;
-      transition:transform 160ms ease,opacity 160ms ease,box-shadow 160ms ease,border-color 160ms ease;
+      border:1px solid rgba(255,255,255,0.06);
+      color:#ffffff;        /* 白字 */
+      font-size:20px;       /* 稍微小一点 */
+      text-align:center;
+      pointer-events:auto;
+      transition:transform 160ms ease,opacity 160ms ease,box-shadow 160ms ease;
       backdrop-filter:blur(4px);
+      text-shadow:          /* 用阴影模拟黑色描边 */
+        0 0 2px #000,
+        0 0 3px #000,
+        0 0 4px #000;
       z-index: 20;
       outline: none;
       cursor: pointer;
@@ -63,7 +96,7 @@
     @media (max-width:760px){
       :root{--card-w:86vw}
       .label{font-size:14px;min-width:140px;padding:10px 12px}
-      .core-card{top:50%}
+      .core-card{top:45%}
     }
   </style>
 </head>
@@ -340,7 +373,7 @@
       const el = document.createElement('button');
       el.className = 'label';
       el.type = 'button';
-      el.innerHTML = `<div style="font-weight:600">${p.title}</div><div style='font-size:13px;color:#ffffff;margin-top:5px;'>点击查看</div>`;
+      el.innerHTML = `<div style="font-weight:600">${p.title}</div>`;
       el.style.opacity = '0';
       el.dataset.index = idx;
       
@@ -674,6 +707,7 @@
 </body>
 </html>
     
+
 
 
 
