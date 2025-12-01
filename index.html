@@ -91,6 +91,18 @@
 
     /* 底部说明 */
     .hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:12px;color:var(--muted);z-index:5}
+    /* 顶部说明 */
+    .top-hint{
+      position:absolute;
+      left:50%;
+      top:12px;            /* 顶部留一点距离 */
+      transform:translateX(-50%);
+      font-size:12px;
+      color:var(--muted);  /* 和底部提示一样的灰色 */
+      opacity:0.9;
+      letter-spacing:0.5px;
+      pointer-events:none; /* 不影响交互 */
+    }
 
     /* 小屏适配：强制把核心卡片和小星球都缩小一档 */
     @media (max-width:760px){
@@ -133,7 +145,8 @@
 <body>
   <div class="stage">
     <canvas id="galaxy" aria-hidden="true"></canvas>
-
+    <!-- 顶部提示 -->
+    <div class="top-hint">My universe, my galaxy.</div>
     <div class="core-card" id="coreCard">
       <div class="core-title">刘子硕</div>
       <div class="core-sub">同济大学 交通运输工程 研究生<br/>研究方向：道路安全、驾驶人行为、自驾算法应用<br/>加入人类整体的智慧之旅</div>
@@ -737,6 +750,7 @@
 </body>
 </html>
     
+
 
 
 
