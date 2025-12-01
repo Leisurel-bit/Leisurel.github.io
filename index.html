@@ -41,6 +41,7 @@
       border:1px solid rgba(255,255,255,0.06);color:var(--fg);font-size:16px;text-align:center;pointer-events:auto;
       transition:transform 160ms ease,opacity 160ms ease,box-shadow 160ms ease,border-color 160ms ease;
       backdrop-filter:blur(4px);
+      z-index: 20;
       outline: none;
       cursor: pointer;
     }
@@ -62,7 +63,7 @@
     @media (max-width:760px){
       :root{--card-w:86vw}
       .label{font-size:14px;min-width:140px;padding:10px 12px}
-      .core-card{top:38%}
+      .core-card{top:50%}
     }
   </style>
 </head>
@@ -555,6 +556,14 @@
         const by = p.baseY + Math.cos((t*0.8)+p.orbitOffset*0.7)*6;
         p.x = bx; 
         p.y = by;
+        // === 新增：根据屏幕大小做“安全边距”限制 ===
+        const isMobile = W < 768;
+        const marginX = isMobile ? 40 : 60;   // 左右至少留 40/60 像素
+        const marginY = isMobile ? 80 : 100;  // 上下至少留 80/100 像素
+      
+        // 把粒子坐标限制在可视区域内
+        p.x = Math.max(marginX, Math.min(W - marginX, p.x));
+        p.y = Math.max(marginY, Math.min(H - marginY, p.y));
 
         const dist = Math.hypot(p.x-center.x,p.y-center.y);
         let alpha = 0.1 + 0.15 * Math.max(0, 1 - dist / (Math.min(W,H)*0.7));
@@ -604,7 +613,9 @@
 
         if(p._el){ 
           p._el.style.left = (p.x) + 'px'; 
-          p._el.style.top = (p.y - 45) + 'px'; 
+          // 防止文本框贴到最顶端，看不到
+          const minTop = 32;
+          p._el.style.top  = Math.max(minTop, p.y - 32) + 'px';
           p._el.style.opacity = '1';
           
           if(p.hover){ 
@@ -663,6 +674,7 @@
 </body>
 </html>
     
+
 
 
 
