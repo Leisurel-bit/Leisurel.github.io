@@ -315,6 +315,17 @@
         grid-template-columns:repeat(2,1fr);
       }
     }
+    /* 强制覆盖文章标题链接样式（白色 + 加粗） */
+.article-title a {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+.article-title a:hover {
+  color: #e0e0e0 !important;
+  text-decoration: underline !important;
+}
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -690,6 +701,7 @@
   </script>
 </body>
 </html>
+
 
 
 
