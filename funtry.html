@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>有趣的尝试 - 刘子硕</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6C63FF',
+            secondary: '#FF6584',
+            accent: '#00F5D4',
+            dark: '#0B0B1A',
+            light: '#F8F9FA',
+            time: {
+              long: '#4ECDC4',
+              short: '#FFD166'
+            }
+          },
+          fontFamily: {
+            fun: ['"Comic Sans MS"', '"Marker Felt"', 'sans-serif']
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'wiggle': 'wiggle 1s ease-in-out infinite',
+            'bounce-slow': 'bounce 3s infinite',
+            'twinkle': 'twinkle 4s infinite alternate',
+            'drift': 'drift 60s linear infinite'
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            twinkle: {
+              '0%': { opacity: 0.3 },
+              '100%': { opacity: 1 }
+            },
+            drift: {
+              '0%': { transform: 'translate(0, 0)' },
+              '100%': { transform: 'translate(-200px, -100px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      .rotate-hover {
+        transition: transform 0.3s ease;
+      }
+      .rotate-hover:hover {
+        transform: rotate(3deg) scale(1.02);
+      }
+      .card-flip {
+        perspective: 1000px;
+      }
+      .card-inner {
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+      }
+      .card-front, .card-back {
+        backface-visibility: hidden;
+      }
+      .card-back {
+        transform: rotateY(180deg);
+      }
+      .card-flipped .card-inner {
+        transform: rotateY(180deg);
+      }
+      .star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        animation: twinkle 4s infinite alternate;
+      }
+      .nebula {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.2;
+        animation: drift 120s linear infinite;
+      }
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background-color: #f44336;
+        opacity: 0;
+        animation: confetti-fall 5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 1000;
+      }
+      @keyframes confetti-fall {
+        0% {
+          transform: translateY(-10px) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+      .scroll-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .scroll-reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="bg-dark text-light min-h-screen relative overflow-x-hidden">
+  <!-- 星空背景 -->
+  <div id="starfield" class="fixed inset-0 z-0"></div>
+  
+  <!-- 导航栏 -->
+  <nav class="fixed top-0 left-0 right-0 bg-dark/80 backdrop-blur-md z-50 border-b border-primary/20 transition-all duration-300" id="navbar">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <i class="fa fa-rocket text-accent text-2xl animate-pulse-slow"></i>
+        <h1 class="text-xl font-fun font-bold text-white">趣味探索</h1>
+      </div>
+      <a href="index.html" class="flex items-center gap-2 bg-primary/20 hover:bg-primary/30 text-white px-4 py-2 rounded-full transition-all duration-300">
+        <i class="fa fa-home"></i>
+        <span>返回主页</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- 页面标题 -->
+  <header class="pt-24 pb-12 px-4 text-center relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full">
+      <div class="absolute top-10 left-10 w-20 h-20 bg-primary/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-10 right-10 w-32 h-32 bg-secondary/20 rounded-full blur-3xl"></div>
+    </div>
+    <div class="container mx-auto relative z-10">
+      <h1 class="text-[clamp(2rem,5vw,4rem)] font-fun font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-accent via-primary to-secondary animate-pulse-slow">
+        有趣的尝试
+      </h1>
+      <p class="text-gray-300 max-w-2xl mx-auto text-[clamp(1rem,2vw,1.25rem)]">
+        生活中的奇思妙想与付诸实践的乐趣，每一次尝试都是一次探险
+      </p>
+      
+      <!-- 互动元素：漂浮的小图标 -->
+      <div class="hidden md:block absolute top-20 left-10 w-12 h-12 bg-time-long/20 rounded-full flex items-center justify-center animate-float">
+        <i class="fa fa-calendar text-time-long"></i>
+      </div>
+      <div class="hidden md:block absolute bottom-10 right-20 w-10 h-10 bg-time-short/20 rounded-full flex items-center justify-center animate-float" style="animation-delay: 1s">
+        <i class="fa fa-bolt text-time-short"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- 分类切换 -->
+  <div class="container mx-auto px-4 mb-12 relative z-10">
+    <div class="flex justify-center gap-4 md:gap-6">
+      <button class="category-btn active px-6 py-3 rounded-full font-medium transition-all duration-300" data-category="all">
+        <i class="fa fa-th-large mr-2"></i>全部
+      </button>
+      <button class="category-btn px-6 py-3 rounded-full font-medium transition-all duration-300" data-category="long">
+        <i class="fa fa-hourglass-half mr-2 text-time-long"></i>长期动作
+      </button>
+      <button class="category-btn px-6 py-3 rounded-full font-medium transition-all duration-300" data-category="short">
+        <i class="fa fa-bolt mr-2 text-time-short"></i>短期动作
+      </button>
+    </div>
+  </div>
+
+  <!-- 主要内容区 -->
+  <main class="container mx-auto px-4 pb-20 relative z-10">
+    <!-- 长期动作 -->
+    <section class="mb-20">
+      <h2 class="text-3xl md:text-4xl font-fun font-bold mb-10 pl-2 border-l-4 border-time-long inline-block">
+        <i class="fa fa-hourglass-half mr-3 text-time-long"></i>长期动作
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- 长期动作1：SITP项目 -->
+        <div class="activity-card scroll-reveal" data-category="long">
+          <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 shadow-xl hover:shadow-time-long/20 transition-all duration-500 rotate-hover h-full">
+            <div class="h-48 overflow-hidden relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-time-long/70 to-primary/70"></div>
+              <img src="https://picsum.photos/id/24/800/400" alt="SITP项目媒体工作" class="w-full h-full object-cover mix-blend-overlay">
+              <div class="absolute top-4 left-4 bg-dark/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                2022年4月-2023年4月
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-3 text-white">同济大学创新创业项目媒体账号负责人</h3>
+              <p class="text-gray-300 mb-4">基于素材萃集和人物访谈的文学创作平台，负责团队媒体账号运营</p>
+              
+              <div class="space-y-4 mb-6">
+                <div class="p-4 bg-gray-800/50 rounded-xl border border-gray-700/30">
+                  <h4 class="font-bold text-time-long mb-2 flex items-center">
+                    <i class="fa fa-newspaper-o mr-2"></i>代表作品 1
+                  </h4>
+                  <p class="text-gray-300 text-sm mb-2">采访校园第一批新冠确诊学生，整理35000字会议纪要并精简为推文，还原真实情况，减少恐慌，获得7000＋浏览量。</p>
+                  
+                  <a href="https://mp.weixin.qq.com/s/e4zwL0CxNEGSZBaqysPwRQ" class="inline-flex items-center text-accent hover:underline text-sm mt-1" target="_blank">
+                    查看推文 <i class="fa fa-external-link ml-1"></i>
+                  </a>
+                </div>
+                
+                <div class="p-4 bg-gray-800/50 rounded-xl border border-gray-700/30">
+                  <h4 class="font-bold text-time-long mb-2 flex items-center">
+                    <i class="fa fa-newspaper-o mr-2"></i>代表作品 2
+                  </h4>
+                  <p class="text-gray-300 text-sm mb-2">创意招生推送：采用svg排版和知乎页面形式实现趣味招生推文，获得5000＋浏览量，被招生组老师宣传使用。</p>
+                  <a href="https://mp.weixin.qq.com/s/XoDxz7QWLUT90XCbiV5yPA" class="inline-flex items-center text-accent hover:underline text-sm mt-1" target="_blank">
+                    查看推文 <i class="fa fa-external-link ml-1"></i>
+                  </a>
+                </div>
+                
+                <div class="p-4 bg-gray-800/50 rounded-xl border border-gray-700/30">
+                  <h4 class="font-bold text-time-long mb-2 flex items-center">
+                    <i class="fa fa-newspaper-o mr-2"></i>代表作品 3
+                  </h4>
+                  <p class="text-gray-300 text-sm mb-2">线下放置考研祝福箱，收集近百位考研同学的心声，并制作GQ实验室"红了"同款推文。</p>
+                  <a href="https://mp.weixin.qq.com/s/1DFY4Iep4lNU6wn2UwgGew" class="inline-flex items-center text-accent hover:underline text-sm mt-1" target="_blank">
+                    查看推文 <i class="fa fa-external-link ml-1"></i>
+                  </a>
+                </div>
+              </div>
+              
+              <!-- 互动元素：点赞按钮 -->
+              <div class="flex justify-between items-center pt-2 border-t border-gray-700/50">
+                <div class="flex items-center gap-4">
+                  <button class="like-btn flex items-center gap-1 text-gray-400 hover:text-secondary transition-colors">
+                    <i class="fa fa-heart-o"></i>
+                    <span class="like-count">0</span>
+                  </button>
+                  <button class="flex items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+                    <i class="fa fa-comment-o"></i>
+                    <span>评论</span>
+                  </button>
+                </div>
+                <button class="share-btn text-gray-400 hover:text-accent transition-colors">
+                  <i class="fa fa-share-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+                <!-- 长期动作2：AI 短视频矩阵运营 -->
+        <div class="activity-card scroll-reveal" data-category="long">
+          <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 shadow-xl hover:shadow-time-long/20 transition-all duration-500 h-full flex flex-col">
+            <!-- 顶部封面图 -->
+            <div class="h-48 overflow-hidden relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-secondary/70 to-primary/70"></div>
+              <!-- 你可以换成自己的封面图 -->
+              <img src="https://picsum.photos/id/1011/800/400" alt="AI短视频矩阵运营" class="w-full h-full object-cover mix-blend-overlay">
+              <div class="absolute top-4 left-4 bg-dark/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                长期进行中
+              </div>
+            </div>
+
+            <!-- 内容主体 -->
+            <div class="p-6 flex-grow flex flex-col">
+              <h3 class="text-xl font-bold mb-3 text-white">AI 短视频矩阵运营</h3>
+              <p class="text-gray-300 mb-4">
+                系统化搭建 Coze 工作流，精确筛选热门话题；熟练运用 Sora、即梦等主流 AI 视频生成工具，高效产出作品；通过 RunningHub 工作流对视频去水印并增强画质；在情侣、宠物、老年赛道实现跨平台多账号矩阵式运营，累计 10w+ 粉丝。
+              </p>
+
+              <!-- 标签区域（无跳转链接） -->
+              <div class="mb-4">
+                <h4 class="font-bold text-time-long mb-2 flex items-center">
+                  <i class="fa fa-tags mr-2"></i> 覆盖平台
+                </h4>
+                <div class="flex flex-wrap gap-2 text-sm">
+                  <span class="px-3 py-1 rounded-full bg-gray-800/70 border border-gray-600/60 text-gray-200">
+                    抖音
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-gray-800/70 border border-gray-600/60 text-gray-200">
+                    小红书
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-gray-800/70 border border-gray-600/60 text-gray-200">
+                    视频号
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-gray-800/70 border border-gray-600/60 text-gray-200">
+                    快手
+                  </span>
+                </div>
+              </div>
+
+              <!-- 16:9 图片栏 -->
+              <div class="mt-2">
+                <p class="text-gray-400 text-sm mb-2">
+                  形成成体系的 AI 工具短视频教学资料并用于分享
+                </p>
+                <div class="rounded-xl overflow-hidden border border-gray-700/50 bg-gray-900/60 aspect-video">
+                  <img src="images/works/e.jpg" alt="AI工具短视频教学资料" class="w-full h-full object-cover">
+                </div>
+              </div>
+            </div>
+
+            <!-- 底部：点赞/信息栏，沿用原风格 -->
+            <div class="p-6 pt-0">
+              <div class="flex justify-between items-center pt-4 border-t border-gray-700/50">
+                <div class="flex items-center gap-4">
+                  <button class="like-btn flex items-center gap-1 text-gray-400 hover:text-secondary transition-colors">
+                    <i class="fa fa-heart-o"></i>
+                    <span class="like-count">0</span>
+                  </button>
+                  <div class="text-gray-400 text-sm">
+                    <i class="fa fa-users mr-1"></i>
+                    <span>矩阵累计 10w+ 粉丝</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+                <!-- 长期动作3：上海沩徕教育科技有限公司 兼职高中教师 -->
+        <div class="activity-card scroll-reveal" data-category="long">
+          <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 shadow-xl hover:shadow-time-long/20 transition-all duration-500 h-full flex flex-col">
+            
+            <!-- 顶部封面图 -->
+            <div class="h-48 overflow-hidden relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-time-long/70 to-primary/70"></div>
+              <!-- 这里可以换成你自己上传的头图地址 -->
+              <img src="images/culture/3.jpg" alt="上海沩徕教育科技有限公司 兼职高中教师" class="w-full h-full object-cover mix-blend-overlay">
+              <div class="absolute top-4 left-4 bg-dark/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                2022年9月-12月 · 2024年2月-6月
+              </div>
+            </div>
+
+            <!-- 文本内容 -->
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-3 text-white">
+                上海沩徕教育科技有限公司 兼职高中教师
+              </h3>
+              <p class="text-gray-300 mb-4 text-sm leading-relaxed">
+                先后负责上海市进才中学、晋元中学、大同中学 Civil and Infrastructure Engineering
+                选修课程的教研内容，独立完成课程设计、实践环节策划、PPT 制作、内容周报、
+                工作流程与成果记录等，并带领学生完成桥梁设计与搭建实践课程。
+              </p>
+
+              <!-- 图片区域：三张图 -->
+              <div class="grid grid-cols-3 gap-3 mt-4">
+                <div class="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/40 aspect-[4/3]">
+                  <img src="images/works/11.jpg" alt="课堂教学照片 1" class="w-full h-full object-cover">
+                </div>
+                <div class="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/40 aspect-[4/3]">
+                  <img src="images/works/22.jpg" alt="课堂教学照片 2" class="w-full h-full object-cover">
+                </div>
+                <div class="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/40 aspect-[4/3]">
+                  <img src="images/works/33.jpg" alt="课堂教学照片 3" class="w-full h-full object-cover">
+                </div>
+              </div>
+            </div>
+
+            <!-- 底部点赞区域（保持和前两个长期动作一致） -->
+            <div class="px-6 pb-6 pt-0 mt-auto">
+              <div class="flex justify-between items-center pt-4 border-t border-gray-700/50">
+                <div class="flex items-center gap-4">
+                  <button class="like-btn flex items-center gap-1 text-gray-400 hover:text-secondary transition-colors">
+                    <i class="fa fa-heart-o"></i>
+                    <span class="like-count">0</span>
+                  </button>
+                  <button class="flex items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+                    <i class="fa fa-comment-o"></i>
+                    <span>评论</span>
+                  </button>
+                </div>
+                <button class="share-btn text-gray-400 hover:text-accent transition-colors">
+                  <i class="fa fa-share-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 长期动作3：预留位置 -->
+        <div class="activity-card scroll-reveal" data-category="long">
+          <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border-2 dashed border-gray-600/50 shadow-lg h-full flex flex-col items-center justify-center p-8 text-center hover:border-primary/50 transition-all duration-300 group">
+            <div class="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-all duration-300">
+              <i class="fa fa-plus text-3xl text-gray-500 group-hover:text-primary transition-all duration-300"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-gray-400 group-hover:text-white transition-colors">长期动作预留位</h3>
+            <p class="text-gray-500 max-w-md">这里将展示新的长期有趣项目，敬请期待...</p>
+            
+            <!-- 彩蛋：点击显示提示 -->
+            <button id="secretHint" class="mt-6 text-xs text-gray-500 hover:text-accent transition-colors">
+              点击查看线索 <i class="fa fa-eye-slash ml-1"></i>
+            </button>
+            <p id="hintText" class="mt-3 text-xs text-gray-500 hidden">世界上有趣的事情太多了，我什么都有可能去尝试！</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 短期动作 -->
+    <section>
+      <h2 class="text-3xl md:text-4xl font-fun font-bold mb-10 pl-2 border-l-4 border-time-short inline-block">
+        <i class="fa fa-bolt mr-3 text-time-short"></i>短期动作
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- 短期动作1：意大利游学总结册 -->
+<div class="activity-card scroll-reveal" data-category="short">
+  <div class="card-flip h-full">
+    <div class="card-inner relative h-full">
+
+      <!-- ========= 正面 ========= -->
+      <div class="card-front absolute inset-0 bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 shadow-xl hover:shadow-time-short/20 transition-all duration-500 rotate-hover h-full">
+
+        <!-- 用 flex 把正面拆成：头图 + 内容区域 + 图片网格 -->
+        <div class="flex flex-col h-full">
+
+          <!-- 顶部：原头图（保持不变） -->
+          <div class="h-48 overflow-hidden relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-time-short/70 to-yellow-500/70"></div>
+            <img src="https://picsum.photos/id/1067/800/400" alt="意大利游学" class="w-full h-full object-cover mix-blend-overlay">
+            <div class="absolute top-4 left-4 bg-dark/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+              2023年6月-2023年9月
+            </div>
+            <div class="absolute top-4 right-4 bg-accent/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-accent rotate-12">
+              点击翻转查看内页
+            </div>
+          </div>
+
+          <!-- 中部：内容区域（必须保留的部分） -->
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-3 text-white">意大利游学总结册负责人</h3>
+
+            <p class="text-gray-300 mb-4">
+              上海市市级创新创业项目“知行济意”，负责意大利游学总结册和跨文化交流研究。
+            </p>
+
+            <div class="space-y-3 mb-4">
+              <div class="flex items-start gap-2">
+                <i class="fa fa-check-circle text-time-short mt-1"></i>
+                <p class="text-gray-300 text-sm">
+                  以文化交流为主题，确立中国戏剧与意大利歌剧融合呼应为排版风格
+                </p>
+              </div>
+
+              <div class="flex items-start gap-2">
+                <i class="fa fa-check-circle text-time-short mt-1"></i>
+                <p class="text-gray-300 text-sm">
+                  将总结册划分为序曲、宣叙调、间奏曲、重唱、咏叹调等章节
+                </p>
+              </div>
+
+              <div class="flex items-start gap-2">
+                <i class="fa fa-check-circle text-time-short mt-1"></i>
+                <p class="text-gray-300 text-sm">
+                  负责图片选取、文案撰写，获得市级创新创业项目评级并顺利结题
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部：四图铺满剩余空间 -->
+          <div class="flex-1 px-6 pb-6">
+            <div class="w-full h-full rounded-xl overflow-hidden">
+              <div class="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full">
+                <img src="images/works/1.jpg" class="w-full h-full object-cover">
+                <img src="images/works/2.jpg" class="w-full h-full object-cover">
+                <img src="images/works/3.jpg" class="w-full h-full object-cover">
+                <img src="images/works/4.jpg" class="w-full h-full object-cover">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========= 背面（保持不变） ========= -->
+      <div class="card-back absolute inset-0 bg-dark/70 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 shadow-xl p-6 h-full">
+
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-white">总结册内页预览</h3>
+          <span class="bg-gray-800 px-3 py-1 rounded-full text-xs">点击翻转返回</span>
+        </div>
+
+        <div class="bg-gray-100 text-gray-800 rounded-lg p-5 h-[calc(100%-40px)] overflow-auto font-serif">
+
+          <h4 class="text-lg font-bold mb-3 text-gray-900">节选文字</h4>
+
+          <p class="text-gray-700 leading-relaxed mb-4">
+            回忆起这段旅途，除了鸿篇巨制的古典作品、充满气泡的大瓶纯净水和没有安检与检票的火车，想到的都是我们这群创造故事的人。夜行罗马城、景点下同一个姿势轮流摆拍、复刻偶像和电影片段的场景与动作、寻找票根上的名画、在凉爽的清晨骑滑板车、去唐人街吃早饭、深夜和朋友们一起畅聊……太多的片刻，再一次让省略号成为游记里最常见的标点。
+          </p>
+
+          <p class="text-gray-700 leading-relaxed mb-4">
+            在这个什么都不熟悉的地方，陌生反而让我们减少了束缚。在这里每个人都是主角。语言只是表达的工具，肢体动作依然亲切；店员颇具耐心，友善地和我们互动；街头上或唱或跳，闲暇的人们表现着生活情趣；和小孩一起凑近喷泉，直饮户外清凉的水…… 尽管这里遍布着历史遗迹与文化遗产，但走在街头巷尾的我们依然会经常忘记它的厚重、悠长与古典，而只是把它看成一座与人距离很近的城市，一群充满活力、热情似火的意大利人的住地。加入这片土地的我们，也同当地人一道参透着生活的本质。 
+          </p>
+          <p class="text-gray-700 leading-relaxed mb-4">
+            当一段旅途过于难忘，就会让人忍不住去靠近完美回忆，而在这时，就容易想到一些不可避免的缺憾。很遗憾，在那个阳光很大的下午，比萨街头四个人撑着伞蹲在地上，没能真的践行脑海里突如其来的疯狂念头：奔向当时离我们仅四十分钟里程的地中海，并在日落之前坐上回佛罗伦萨的末班车；很遗憾，换乘多次到达郊区的圣西罗球场，却因当天有演唱会无法进入球场内部参观；很遗憾，因行程匆忙没能在米开朗琪罗广场看一场日落；很遗憾，没有登顶教堂一览梵蒂冈全城的风貌……但惊喜和感动远比遗憾要丰富得多，我们这段热烈奔放的日子在意大利的超长白昼下被极力拉长，相机里每一张拍下的街道、每一幅笑容和每一次抬头的瞬间都是最好的印证。 
+          </p>
+          <p class="text-gray-700 leading-relaxed mb-4">
+            这次意大利之行，给许多问题有了范围之外的答案，让我意识到人生所谓的限制可以不断地突破。创意带来无限可能，而每一个擅长创新的人，理所应当拥有一段富有创意的人生。接下来，也要继续活成不断变化的风景本身。
+          </p>
+          <!-- 图片 -->
+          <div class="mt-4">
+            <img src="images/works/5.jpg" class="w-full h-40 object-cover rounded-md">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+        
+        <!-- 短期动作2：微信聊天记录可视化 -->
+        <div class="activity-card scroll-reveal" data-category="short">
+          <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 shadow-xl hover:shadow-time-short/20 transition-all duration-500 h-full">
+            <div class="h-48 overflow-hidden relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-primary/70 to-blue-500/70"></div>
+              <img src="https://picsum.photos/id/180/800/400" alt="微信聊天记录可视化" class="w-full h-full object-cover mix-blend-overlay">
+              <div class="absolute top-4 left-4 bg-dark/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                2024年2月
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-3 text-white">自制微信聊天记录可视化</h3>
+              <p class="text-gray-300 mb-4">通过抓取聊天记录文件，利用python（matplotlib）统计词云图、热力图消息数量变化折线图、散点图、消息类型堆叠图等，并在各平台发布h5成果，</p>
+              
+              <!-- 互动元素：可视化预览区 -->
+              <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 aspect-square flex items-center justify-center hover:scale-105 transition-transform">
+                  <img src="images/works/a.jpg" alt="词云图" class="w-full h-full object-cover rounded">
+                  <div class="absolute text-xs bg-black/50 px-2 py-1 rounded">词云图</div>
+                </div>
+                <div class="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 aspect-square flex items-center justify-center hover:scale-105 transition-transform">
+                  <img src="images/works/b.jpg" alt="热力图" class="w-full h-full object-cover rounded">
+                  <div class="absolute text-xs bg-black/50 px-2 py-1 rounded">柱状图</div>
+                </div>
+                <div class="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 aspect-square flex items-center justify-center hover:scale-105 transition-transform">
+                  <img src="images/works/c.jpg" alt="折线图" class="w-full h-full object-cover rounded">
+                  <div class="absolute text-xs bg-black/50 px-2 py-1 rounded">热力图</div>
+                </div>
+                <div class="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 aspect-square flex items-center justify-center hover:scale-105 transition-transform">
+                  <img src="images/works/d.jpg" alt="散点图" class="w-full h-full object-cover rounded">
+                  <div class="absolute text-xs bg-black/50 px-2 py-1 rounded">饼图与折线图</div>
+                </div>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3 text-sm text-gray-400">
+                  <div><i class="fa fa-eye mr-1 text-primary"></i> 1.7w+ 浏览</div>
+                  <div><i class="fa fa-comment mr-1 text-secondary"></i> 280+ 求助</div>
+                </div>
+                <a href="https://mp.weixin.qq.com/s/Ro63b2w3eNkcnY2RGtqyEg" class="inline-flex items-center bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 rounded-lg transition-all duration-300" target="_blank">
+                  <i class="fa fa-play-circle mr-2"></i>
+                  查看制作教程推送
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 短期动作3：短期尝试时间线小汇总 -->
+<div class="activity-card scroll-reveal" data-category="short">
+  <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border-2 dashed border-gray-600/50 shadow-lg h-full flex flex-col items-center p-8 text-center hover:border-time-short/50 transition-all duration-300 group">
+
+    <!-- 图标区域（不变） -->
+    <div class="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mb-6 group-hover:bg-time-short/20 transition-all duration-300">
+      <i class="fa fa-clock-o text-3xl text-gray-500 group-hover:text-time-short transition-all duration-300"></i>
+    </div>
+
+    <!-- 标题 -->
+    <h3 class="text-xl font-bold mb-6 text-gray-300 group-hover:text-white transition-colors">
+      短期尝试时间线小汇总
+    </h3>
+
+    <!-- 更大尺寸的横版时间线图片 -->
+    <div class="w-full max-w-2xl rounded-xl overflow-hidden border border-gray-700/40 shadow-md mb-6">
+      <img src="images/works/timeline.jpg" alt="时间线图" class="w-full h-56 object-cover">
+    </div>
+
+    <!-- 单行文案 + 推文链接，放一起 -->
+    <div class="flex items-center gap-3 text-sm text-gray-300 mb-2">
+      <span>我甚至还尝试过做一下创投经理，在某组织里留下了一点痕迹</span>
+      <a href="https://mp.weixin.qq.com/s/fxYZBmTbWF_CE-H_nomsGw" target="_blank" class="text-accent font-semibold hover:underline whitespace-nowrap">
+        查看推文 →
+      </a>
+    </div>
+
+  </div>
+</div>
+
+        <!-- 短期动作4：预留位置 -->
+        <div class="activity-card scroll-reveal" data-category="short">
+          <div class="bg-dark/50 backdrop-blur-sm rounded-2xl overflow-hidden border-2 dashed border-gray-600/50 shadow-lg h-full flex flex-col items-center justify-center p-8 text-center hover:border-accent/50 transition-all duration-300 group">
+            <div class="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-all duration-300">
+              <i class="fa fa-plus text-3xl text-gray-500 group-hover:text-accent transition-all duration-300"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-gray-400 group-hover:text-white transition-colors">短期动作预留位</h3>
+            <p class="text-gray-500 max-w-md">这里将展示新的短期有趣项目，敬请期待...</p>
+            
+            <!-- 互动元素：随机笑话生成器 -->
+            <button id="jokeBtn" class="mt-6 bg-gray-800/50 hover:bg-gray-800 text-gray-300 px-4 py-2 rounded-lg text-sm transition-all duration-300">
+              <i class="fa fa-smile-o mr-1"></i> 讲个笑话听听
+            </button>
+            <p id="jokeText" class="mt-3 text-sm text-gray-400 max-w-xs hidden"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- 页脚 -->
+  <footer class="bg-dark/80 backdrop-blur-md border-t border-gray-800 py-8 relative z-10">
+    <div class="container mx-auto px-4 text-center">
+      <p class="text-gray-500 text-sm">探索更多有趣的事物，让生活充满惊喜与创意</p>
+      <p class="text-gray-600 text-xs mt-2">© 2025 刘子硕的趣味探索空间</p>
+    </div>
+  </footer>
+  
+  <!-- 彩蛋：悬浮的小元素 -->
+  <div id="floatingElement" class="fixed bottom-6 right-6 bg-primary/20 backdrop-blur-sm p-3 rounded-full cursor-pointer opacity-0 transition-opacity duration-500 hover:bg-primary/30 z-40">
+    <i class="fa fa-lightbulb-o text-primary text-xl"></i>
+  </div>
+  
+  <!-- 彩蛋：隐藏消息 -->
+  <div id="hiddenMessage" class="fixed bottom-24 right-6 bg-dark/90 backdrop-blur-md p-4 rounded-xl border border-primary/30 shadow-xl max-w-xs hidden z-50">
+    <h4 class="font-bold text-primary mb-2">发现隐藏成就！</h4>
+    <p class="text-gray-300 text-sm">你是第 <span id="visitorCount">???</span> 位探索到这里的访客</p>
+    <button id="closeMessage" class="mt-3 text-xs text-primary hover:underline">关闭</button>
+  </div>
+
+  <script>
+    // 创建星空背景
+    function createStarfield() {
+      const starfield = document.getElementById('starfield');
+      const starsCount = 200;
+      const nebulasCount = 3;
+      
+      // 创建星星
+      for (let i = 0; i < starsCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // 随机大小
+        const size = Math.random() * 1.5 + 0.3;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // 随机位置
+        star.style.left = `${Math.random() * 100}vw`;
+        star.style.top = `${Math.random() * 100}vh`;
+        
+        // 随机闪烁动画延迟和持续时间
+        const delay = Math.random() * 5;
+        const duration = Math.random() * 5 + 2;
+        star.style.animationDelay = `${delay}s`;
+        star.style.animationDuration = `${duration}s`;
+        
+        // 随机亮度
+        const opacity = Math.random() * 0.7 + 0.3;
+        star.style.opacity = opacity;
+        
+        starfield.appendChild(star);
+      }
+      
+      // 创建星云
+      const nebulaColors = ['#6C63FF', '#4ECDC4', '#FF6584'];
+      for (let i = 0; i < nebulasCount; i++) {
+        const nebula = document.createElement('div');
+        nebula.classList.add('nebula');
+        
+        // 随机大小
+        const size = Math.random() * 500 + 600;
+        nebula.style.width = `${size}px`;
+        nebula.style.height = `${size}px`;
+        
+        // 随机位置
+        nebula.style.left = `${Math.random() * 100 - 30}vw`;
+        nebula.style.top = `${Math.random() * 100 - 30}vh`;
+        
+        // 随机颜色
+        nebula.style.backgroundColor = nebulaColors[i % nebulaColors.length];
+        
+        // 随机漂移动画延迟
+        const delay = Math.random() * 20;
+        nebula.style.animationDelay = `${delay}s`;
+        
+        starfield.appendChild(nebula);
+      }
+    }
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 创建星空背景
+      createStarfield();
+      
+      // 导航栏滚动效果
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+          navbar.classList.add('py-2', 'shadow-lg');
+          navbar.classList.remove('py-3');
+        } else {
+          navbar.classList.add('py-3');
+          navbar.classList.remove('py-2', 'shadow-lg');
+        }
+      });
+      
+      // 滚动显示动画
+      const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
+      const revealOnScroll = function() {
+        scrollRevealElements.forEach(element => {
+          const elementTop = element.getBoundingClientRect().top;
+          const elementVisible = 150;
+          if (elementTop < window.innerHeight - elementVisible) {
+            element.classList.add('active');
+          }
+        });
+      };
+      
+      window.addEventListener('scroll', revealOnScroll);
+      revealOnScroll(); // 初始检查
+      
+      // 分类筛选功能
+      const categoryBtns = document.querySelectorAll('.category-btn');
+      const activityCards = document.querySelectorAll('.activity-card');
+      
+      categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          // 更新按钮样式
+          categoryBtns.forEach(b => {
+            b.classList.remove('active', 'bg-primary/20', 'text-white');
+            b.classList.add('bg-gray-800/50', 'text-gray-300');
+          });
+          this.classList.add('active', 'bg-primary/20', 'text-white');
+          this.classList.remove('bg-gray-800/50', 'text-gray-300');
+          
+          const category = this.getAttribute('data-category');
+          
+          // 筛选卡片
+          activityCards.forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+              card.style.display = 'block';
+              // 延迟添加动画，确保显示后有动画效果
+              setTimeout(() => {
+                card.classList.add('opacity-100');
+                card.classList.remove('opacity-0');
+              }, 50);
+            } else {
+              card.classList.remove('opacity-100');
+              card.classList.add('opacity-0');
+              // 延迟隐藏，等待动画完成
+              setTimeout(() => {
+                card.style.display = 'none';
+              }, 300);
+            }
+          });
+        });
+      });
+      
+      // 初始化分类按钮样式
+      document.querySelector('.category-btn.active').classList.add('bg-primary/20', 'text-white');
+      document.querySelector('.category-btn.active').classList.remove('bg-gray-800/50', 'text-gray-300');
+      
+      // 点赞功能
+      const likeBtns = document.querySelectorAll('.like-btn');
+      likeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const icon = this.querySelector('i');
+          const countEl = this.querySelector('.like-count');
+          let count = parseInt(countEl.textContent);
+          
+          if (icon.classList.contains('fa-heart-o')) {
+            icon.classList.remove('fa-heart-o');
+            icon.classList.add('fa-heart', 'text-secondary');
+            countEl.textContent = count + 1;
+            
+            // 创建点赞动画
+            createLikeAnimation(this);
+          } else {
+            icon.classList.remove('fa-heart', 'text-secondary');
+            icon.classList.add('fa-heart-o');
+            countEl.textContent = count - 1;
+          }
+        });
+      });
+      
+      // 创建点赞动画
+      function createLikeAnimation(button) {
+        const like = document.createElement('div');
+        like.innerHTML = '<i class="fa fa-heart text-secondary"></i>';
+        like.classList.add('absolute', 'pointer-events-none', 'animate-bounce-slow');
+        
+        const rect = button.getBoundingClientRect();
+        like.style.top = `${rect.top + window.scrollY - 20}px`;
+        like.style.left = `${rect.left + rect.width/2}px`;
+        like.style.transform = 'translate(-50%, 0)';
+        like.style.zIndex = '10';
+        
+        document.body.appendChild(like);
+        
+        setTimeout(() => {
+          like.remove();
+        }, 1000);
+      }
+      
+      // 卡片翻转功能
+      const cardFlips = document.querySelectorAll('.card-flip');
+      cardFlips.forEach(card => {
+        card.addEventListener('click', function() {
+          this.classList.toggle('card-flipped');
+        });
+      });
+      
+      // 笑话生成器
+      const jokeBtn = document.getElementById('jokeBtn');
+      const jokeText = document.getElementById('jokeText');
+      const jokes = [
+        "一个橙子从房间退出来的时候变成了什么？果汁。因为橙这一退便是一杯汁。",
+        "小明陪朋友看病，为什么只有小明回来了？因为朋友医生一起走。",
+        "有天小猪醒来对妈妈说:“妈妈，我昨晚梦见了自己变成了一个水手，好危险啊。”妈妈说别担心，梦都是反的。第二天，小猪果然变成了火腿。",
+        "旺旺雪饼到了夏天会变成什么？旺旺仙贝（掀被）。",
+        "这个年代大家不喜欢听笑话了，都看脱口秀，给我讲个段子吧。"
+      ];
+      
+      if (jokeBtn && jokeText) {
+        jokeBtn.addEventListener('click', function() {
+          const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+          jokeText.textContent = randomJoke;
+          jokeText.classList.remove('hidden');
+          
+          // 阅读动画
+          const letters = randomJoke.split('');
+          jokeText.textContent = '';
+          
+          letters.forEach((letter, i) => {
+            setTimeout(() => {
+              jokeText.textContent += letter;
+            }, 50 * i);
+          });
+        });
+      }
+      
+      // 隐藏线索
+      const secretHint = document.getElementById('secretHint');
+      const hintText = document.getElementById('hintText');
+      
+      if (secretHint && hintText) {
+        secretHint.addEventListener('click', function() {
+          hintText.classList.toggle('hidden');
+          const icon = this.querySelector('i');
+          if (hintText.classList.contains('hidden')) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            this.textContent = ' 点击查看线索 ';
+            this.prepend(icon);
+          } else {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            this.textContent = ' 隐藏线索 ';
+            this.prepend(icon);
+          }
+        });
+      }
+      
+      // 彩蛋：浮动元素
+      const floatingElement = document.getElementById('floatingElement');
+      const hiddenMessage = document.getElementById('hiddenMessage');
+      const closeMessage = document.getElementById('closeMessage');
+      
+      if (floatingElement && hiddenMessage && closeMessage) {
+        // 页面滚动到一定位置显示彩蛋
+        window.addEventListener('scroll', function() {
+          if (window.scrollY > 1000) {
+            floatingElement.style.opacity = '1';
+          }
+        });
+        
+        floatingElement.addEventListener('click', function() {
+          hiddenMessage.classList.remove('hidden');
+          hiddenMessage.classList.add('animate-float');
+          
+          // 生成随机访客数
+          const visitorCount = Math.floor(Math.random() * 1000) + 1;
+          document.getElementById('visitorCount').textContent = visitorCount;
+          
+          // 显示彩屑效果
+          createConfetti();
+        });
+        
+        closeMessage.addEventListener('click', function() {
+          hiddenMessage.classList.add('hidden');
+          hiddenMessage.classList.remove('animate-float');
+        });
+      }
+      
+      // 生成彩屑效果
+      function createConfetti() {
+        const colors = ['#6C63FF', '#FF6584', '#00F5D4', '#FFD166', '#FFFFFF'];
+        const count = 50;
+        
+        for (let i = 0; i < count; i++) {
+          const confetti = document.createElement('div');
+          confetti.classList.add('confetti');
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = `${Math.random() * 10 + 5}px`;
+          confetti.style.height = `${Math.random() * 10 + 5}px`;
+          confetti.style.left = `${Math.random() * 100}vw`;
+          confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+          confetti.style.animationDelay = `${Math.random() * 2}s`;
+          
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => {
+            confetti.remove();
+          }, 5000);
+        }
+      }
+      
+      // 分享功能
+      const shareBtns = document.querySelectorAll('.share-btn');
+      shareBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          alert('分享功能：复制链接到剪贴板成功！');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
